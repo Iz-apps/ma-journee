@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Ma Journée ✨</title>
+  <!-- PWA meta tags -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ma Journée">
+  <meta name="theme-color" content="#0a0b14">
+  <meta name="description" content="Organisateur quotidien personnel — tâches, santé, routines">
+  <!-- PWA manifest inline via JS blob (single-file PWA) -->
+  <script>
+    (function(){
+      const manifest = {
+        name: "Ma Journée ✨",
+        short_name: "Ma Journée",
+        description: "Organisateur quotidien : tâches, santé & routines",
+        start_url: "./ma-journee.html",
+        display: "standalone",
+        background_color: "#0a0b14",
+        theme_color: "#0a0b14",
+        orientation: "portrait",
+        icons: [
+          { src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a0b14'/><text y='68' x='50' text-anchor='middle' font-size='62'>✨</text></svg>", sizes: "any", type: "image/svg+xml" }
+        ]
+      };
+      const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+      const url  = URL.createObjectURL(blob);
+      const link = document.createElement('link');
+      link.rel = 'manifest'; link.href = url;
+      document.head.appendChild(link);
+    })();
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    :root {
+      --bg:#0a0b14; --surface:#10111e; --card:#161829; --card2:#1c1f35;
+      --border:rgba(255,255,255,0.07); --text:#eef0ff; --muted:#7a85a8;
+      --morning:#f59e0b; --morning-bg:rgba(245,158,11,.10); --morning-bd:rgba(245,158,11,.25);
+      --day:#22d3ee;     --day-bg:rgba(34,211,238,.10);     --day-bd:rgba(34,211,238,.25);
+      --evening:#a78bfa; --evening-bg:rgba(167,139,250,.10); --evening-bd:rgba(167,139,250,.25);
+      --green:#10b981;   --green-bg:rgba(16,185,129,.10);   --green-bd:rgba(16,185,129,.25);
+      --purple:#8b5cf6;  --red:#f87171; --orange:#fb923c;
+      --medical:#38bdf8; --medical-bg:rgba(56,189,248,.10); --medical-bd:rgba(56,189,248,.25);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+    /* ── HEADER ── */
+    .hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:13px 15px 0;position:sticky;top:0;z-index:100;}
+    .hdr-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:11px;flex-wrap:wrap;}
+    .app-title{font-size:18px;font-weight:800;background:linear-gradient(120deg,#f59e0b,#a78bfa,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;}
+    .date-nav{display:flex;align-items:center;gap:5px;}
+    .nav-btn{background:var(--card);border:1px solid var(--border);color:var(--text);width:31px;height:31px;border-radius:7px;cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+    .nav-btn:hover{background:var(--card2);}
+    .date-lbl{font-size:11px;font-weight:600;min-width:155px;text-align:center;text-transform:capitalize;line-height:1.3;}
+    .today-pill{background:var(--evening-bg);border:1px solid var(--evening-bd);color:var(--evening);padding:4px 9px;border-radius:20px;cursor:pointer;font-size:11px;font-weight:700;transition:all .2s;white-space:nowrap;}
+    .today-pill:hover{background:rgba(167,139,250,.2);}
+    .prog-row{display:flex;align-items:center;gap:8px;padding:9px 0 11px;}
+    .prog-emoji{font-size:15px;min-width:18px;}
+    .prog-track{flex:1;height:6px;background:var(--card2);border-radius:3px;overflow:hidden;}
+    .prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#f59e0b,#22d3ee,#a78bfa);transition:width .5s;}
+    .prog-pct{font-size:12px;font-weight:700;min-width:32px;text-align:right;}
+    .tab-nav{display:flex;border-top:1px solid var(--border);}
+    .tab-btn{flex:1;padding:9px 4px 10px;background:none;border:none;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:2px;border-bottom:2px solid transparent;}
+    .tab-btn .ti{font-size:15px;}
+    .tab-btn.active{color:var(--text);border-bottom-color:var(--evening);}
+    .tab-btn:hover:not(.active){color:var(--text);background:rgba(255,255,255,.02);}
+
+    /* ── MAIN ── */
+    .main{max-width:780px;margin:0 auto;padding:16px 12px 60px;}
+
+    /* ── WELCOME ── */
+    .welcome{background:var(--card);border:1px solid var(--evening-bd);border-radius:16px;padding:28px 20px;text-align:center;}
+    .welcome-icon{font-size:48px;margin-bottom:12px;}
+    .welcome-title{font-size:18px;font-weight:800;margin-bottom:8px;}
+    .welcome-sub{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:18px;max-width:360px;margin-left:auto;margin-right:auto;}
+    .welcome-btn{background:linear-gradient(135deg,var(--purple),var(--evening));color:#fff;border:none;border-radius:10px;padding:11px 24px;cursor:pointer;font-size:14px;font-weight:700;transition:all .2s;}
+    .welcome-btn:hover{filter:brightness(1.1);}
+
+    /* ── MOTIV ── */
+    .motiv{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px;text-align:center;}
+    .motiv-icon{font-size:28px;margin-bottom:4px;}
+    .motiv-title{font-size:14px;font-weight:700;margin-bottom:2px;}
+    .motiv-sub{font-size:12px;color:var(--muted);}
+
+    /* ── SECTION CARD ── */
+    .sec-card{border-radius:12px;overflow:hidden;border:1px solid var(--border);background:var(--card);margin-bottom:13px;}
+    .sec-head{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--border);}
+    .sec-head.matin   {background:var(--morning-bg);border-bottom-color:var(--morning-bd);}
+    .sec-head.journee {background:var(--day-bg);    border-bottom-color:var(--day-bd);}
+    .sec-head.soir    {background:var(--evening-bg);border-bottom-color:var(--evening-bd);}
+    .sec-head.routines{background:rgba(139,92,246,.08);border-bottom-color:rgba(139,92,246,.22);}
+    .sec-head.custom  {background:var(--green-bg);  border-bottom-color:var(--green-bd);}
+    .sec-head.medical {background:var(--medical-bg);border-bottom-color:var(--medical-bd);}
+    .sec-icon{font-size:18px;}
+    .sec-title{font-size:14px;font-weight:700;}
+    .sec-title.matin   {color:var(--morning);}  .sec-title.journee{color:var(--day);}
+    .sec-title.soir    {color:var(--evening);}  .sec-title.routines{color:var(--purple);}
+    .sec-title.custom  {color:var(--green);}    .sec-title.medical{color:var(--medical);}
+    .sec-badge{margin-left:auto;font-size:11px;color:var(--muted);font-weight:600;}
+    .sec-badge.green{color:var(--green);}
+
+    /* ── TASK ROW ── */
+    .task-list{padding:4px;}
+    .task-row{display:flex;align-items:flex-start;gap:8px;padding:8px 9px;border-radius:8px;transition:background .15s;margin-bottom:1px;}
+    .task-row:hover{background:rgba(255,255,255,.03);}
+    .task-row.done{opacity:.55;}
+    .chk{width:20px;height:20px;min-width:20px;border-radius:5px;border:2px solid var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .17s;background:transparent;margin-top:1px;user-select:none;}
+    .chk:hover{border-color:var(--text);transform:scale(1.06);}
+    .chk.matin.on   {background:var(--morning);border-color:var(--morning);}
+    .chk.journee.on {background:var(--day);    border-color:var(--day);}
+    .chk.soir.on    {background:var(--evening);border-color:var(--evening);}
+    .chk.routines.on{background:var(--purple); border-color:var(--purple);}
+    .chk.custom.on  {background:var(--green);  border-color:var(--green);}
+    .chk.medical.on {background:var(--medical);border-color:var(--medical);}
+    .chk-mark{color:#fff;font-size:11px;font-weight:900;opacity:0;transform:scale(0);transition:all .16s;}
+    .chk.on .chk-mark{opacity:1;transform:scale(1);}
+    .task-body{flex:1;min-width:0;}
+    .task-lbl-row{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;}
+    .task-emoji{font-size:13px;}
+    .task-lbl{font-size:13px;font-weight:500;transition:all .2s;}
+    .task-row.done .task-lbl{text-decoration:line-through;color:var(--muted);}
+    .task-inp{margin-top:5px;width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 9px;font-size:12px;font-family:inherit;outline:none;transition:border-color .2s;}
+    .task-inp:focus{border-color:rgba(255,255,255,.17);}
+    .task-inp::placeholder{color:var(--muted);}
+    .task-inp[type="time"]{width:115px;}
+    textarea.task-inp{resize:vertical;min-height:58px;}
+    .time-row{display:flex;align-items:center;gap:8px;padding:8px 9px;border-radius:8px;margin-bottom:1px;transition:background .15s;}
+    .time-row:hover{background:rgba(255,255,255,.03);}
+    .time-lbl{font-size:13px;font-weight:500;flex:1;}
+    .water-row{padding:8px 9px;border-radius:8px;margin-bottom:1px;}
+    .water-top{display:flex;align-items:center;gap:7px;margin-bottom:7px;}
+    .water-cnt{margin-left:auto;font-size:12px;font-weight:700;color:var(--day);}
+    .glasses{display:flex;gap:4px;flex-wrap:wrap;}
+    .glass{width:27px;height:27px;border-radius:6px;border:2px solid rgba(34,211,238,.22);background:transparent;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .2s;color:var(--muted);}
+    .glass.full{background:rgba(34,211,238,.14);border-color:var(--day);color:var(--day);}
+    .glass:hover{transform:scale(1.12);}
+
+    /* ── MEDICAL ── */
+    .med-item{padding:11px 13px;border-bottom:1px solid var(--border);}
+    .med-item:last-child{border-bottom:none;}
+    .med-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+    .med-icon{font-size:16px;}
+    .med-label{font-size:13px;font-weight:600;flex:1;}
+    .med-done{font-size:11px;color:var(--green);font-weight:700;white-space:nowrap;}
+    .med-inputs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+    .med-num{background:var(--card2);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:6px 8px;font-size:15px;font-weight:700;outline:none;width:80px;text-align:center;font-family:inherit;transition:border-color .2s;}
+    .med-num:focus{border-color:var(--medical);}
+    .med-num::placeholder{color:var(--muted);font-size:12px;font-weight:400;}
+    .med-num.sm{width:60px;}
+    .med-unit{font-size:11px;color:var(--muted);white-space:nowrap;}
+    .med-sep{font-size:18px;color:var(--muted);font-weight:700;line-height:1;}
+    .med-time{background:var(--card2);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:5px 7px;font-size:12px;outline:none;width:100px;font-family:inherit;}
+    .med-time:focus{border-color:var(--medical);}
+    .scale-row{display:flex;gap:3px;flex-wrap:wrap;margin-top:2px;}
+    .sc-btn{width:27px;height:27px;border-radius:6px;border:1.5px solid var(--border);background:var(--card2);color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;user-select:none;}
+    .sc-btn:hover{border-color:rgba(255,255,255,.2);}
+    .sc-btn.sel-lo{border-color:var(--green);background:rgba(16,185,129,.2);color:#fff;}
+    .sc-btn.sel-mid{border-color:var(--orange);background:rgba(251,146,60,.2);color:#fff;}
+    .sc-btn.sel-hi{border-color:var(--red);background:rgba(248,113,113,.2);color:#fff;}
+    .mood-row{display:flex;gap:8px;margin-top:4px;}
+    .mood-btn{font-size:24px;cursor:pointer;opacity:.35;transition:all .18s;transform:scale(.85);user-select:none;}
+    .mood-btn:hover{opacity:.7;}
+    .mood-btn.sel{opacity:1;transform:scale(1.2);}
+    .med-note{margin-top:6px;width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:5px 8px;font-size:12px;font-family:inherit;outline:none;}
+    .med-note::placeholder{color:var(--muted);}
+    .med-grp-hdr{padding:6px 13px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);background:var(--card2);border-bottom:1px solid var(--border);}
+
+    /* ── CUSTOM TASKS ── */
+    .add-form{display:flex;gap:6px;padding:8px 10px;border-bottom:1px solid var(--border);}
+    .add-inp{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:6px 9px;font-size:13px;font-family:inherit;outline:none;}
+    .add-inp:focus{border-color:var(--green);}
+    .add-inp::placeholder{color:var(--muted);}
+    .add-btn{background:var(--green);color:#fff;border:none;border-radius:7px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:700;transition:all .2s;white-space:nowrap;}
+    .add-btn:hover{filter:brightness(1.1);}
+    .cust-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border);}
+    .cust-item:last-child{border-bottom:none;}
+    .cust-item.done{opacity:.5;}
+    .cust-txt{flex:1;font-size:13px;font-weight:500;}
+    .cust-item.done .cust-txt{text-decoration:line-through;color:var(--muted);}
+    .carry-tag{font-size:10px;background:rgba(248,113,113,.12);color:var(--red);border:1px solid rgba(248,113,113,.2);border-radius:4px;padding:1px 5px;font-weight:700;white-space:nowrap;}
+    .del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:3px 5px;border-radius:4px;transition:all .2s;}
+    .del-btn:hover{color:var(--red);background:rgba(248,113,113,.1);}
+    .empty-note{padding:16px;text-align:center;color:var(--muted);font-size:12px;}
+    .done-toggle{padding:8px 10px;font-size:11px;color:var(--muted);cursor:pointer;text-align:center;border-top:1px solid var(--border);}
+    .done-toggle:hover{color:var(--text);}
+    .done-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid var(--border);opacity:.4;}
+    .done-item:last-child{border-bottom:none;}
+    .done-txt{flex:1;font-size:12px;text-decoration:line-through;color:var(--muted);}
+    .co-badge{margin-left:6px;background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.25);border-radius:10px;font-size:10px;font-weight:700;padding:1px 7px;}
+
+    /* ── WEEK VIEW ── */
+    .week-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    .week-grid{display:grid;grid-template-columns:repeat(7,minmax(100px,1fr));gap:7px;min-width:700px;}
+    .day-col{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .15s;}
+    .day-col:hover{border-color:rgba(167,139,250,.4);transform:translateY(-1px);}
+    .day-col.today-col{border-color:var(--evening);}
+    .day-col-hdr{padding:9px 8px 7px;text-align:center;border-bottom:1px solid var(--border);}
+    .day-col.today-col .day-col-hdr{background:var(--evening-bg);}
+    .day-name{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+    .day-col.today-col .day-name{color:var(--evening);}
+    .day-num{font-size:19px;font-weight:800;line-height:1.1;margin-top:1px;}
+    .day-col.today-col .day-num{color:var(--evening);}
+    .day-pb{height:3px;background:var(--card2);margin:0 8px 5px;border-radius:2px;overflow:hidden;}
+    .day-pb-fill{height:100%;background:linear-gradient(90deg,#f59e0b,#22d3ee);border-radius:2px;}
+    .day-rt-list{padding:4px 5px 6px;display:flex;flex-direction:column;gap:3px;}
+    .day-rt-item{display:flex;align-items:center;gap:4px;font-size:10px;padding:2px 3px;border-radius:4px;}
+    .day-rt-item.done{opacity:.5;text-decoration:line-through;}
+    .day-rt-chk{width:12px;height:12px;min-width:12px;border-radius:3px;border:1.5px solid var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .14s;flex-shrink:0;}
+    .day-rt-chk.on{background:var(--purple);border-color:var(--purple);}
+    .mini-mark{font-size:7px;font-weight:900;color:#fff;opacity:0;}
+    .day-rt-chk.on .mini-mark{opacity:1;}
+    .day-rt-lbl{flex:1;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .no-rt-day{padding:9px 7px;font-size:10px;color:var(--muted);text-align:center;}
+    .week-note-area{margin-top:15px;}
+    .week-note-inp{width:100%;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:11px 13px;font-size:13px;font-family:inherit;outline:none;resize:vertical;min-height:90px;}
+    .week-note-inp:focus{border-color:rgba(167,139,250,.4);}
+    .week-note-inp::placeholder{color:var(--muted);}
+    .week-sec-title{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:9px;text-transform:uppercase;letter-spacing:.5px;}
+
+    /* ── CONFIG ── */
+    .cfg-intro{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:13px;}
+    .cfg-intro-t{font-size:14px;font-weight:700;margin-bottom:5px;}
+    .cfg-intro-s{font-size:12px;color:var(--muted);line-height:1.5;}
+    .cfg-cat{margin-bottom:11px;}
+    .cfg-cat-hdr{display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--card);border:1px solid var(--border);border-radius:10px 10px 0 0;cursor:pointer;user-select:none;}
+    .cfg-cat-hdr.closed{border-radius:10px;}
+    .cfg-cat-icon{font-size:17px;}
+    .cfg-cat-label{font-size:14px;font-weight:700;flex:1;}
+    .cfg-cat-count{font-size:11px;color:var(--green);font-weight:700;}
+    .cfg-cat-arrow{font-size:10px;color:var(--muted);transition:transform .2s;}
+    .cfg-cat-arrow.open{transform:rotate(90deg);}
+    .cfg-cat-body{background:var(--card);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;overflow:hidden;}
+    .cfg-tools-row{display:flex;gap:5px;padding:7px 13px 5px;border-bottom:1px solid var(--border);}
+    .mini-link{font-size:11px;color:var(--muted);cursor:pointer;padding:2px 6px;border-radius:4px;border:1px solid var(--border);background:var(--card2);transition:all .15s;white-space:nowrap;}
+    .mini-link:hover{color:var(--text);border-color:rgba(255,255,255,.15);}
+    .rt-item{padding:10px 13px;border-bottom:1px solid var(--border);}
+    .rt-item:last-child{border-bottom:none;}
+    .rt-item-top{display:flex;align-items:center;gap:9px;}
+    .rt-icon{font-size:17px;}
+    .rt-label{flex:1;font-size:13px;font-weight:600;}
+    .rt-label.disabled{color:var(--muted);}
+    .toggle-sw{position:relative;width:36px;height:20px;flex-shrink:0;}
+    .toggle-sw input{opacity:0;width:0;height:0;}
+    .sw-slider{position:absolute;inset:0;background:var(--card2);border-radius:20px;cursor:pointer;transition:background .2s;border:1px solid var(--border);}
+    .sw-slider::before{content:'';position:absolute;width:14px;height:14px;left:2px;top:2px;background:var(--muted);border-radius:50%;transition:transform .2s,background .2s;}
+    .toggle-sw input:checked+.sw-slider{background:rgba(16,185,129,.22);border-color:var(--green);}
+    .toggle-sw input:checked+.sw-slider::before{transform:translateX(16px);background:var(--green);}
+    .rt-controls{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+    .cfg-sel{background:var(--card2);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:5px 8px;font-size:12px;font-family:inherit;outline:none;cursor:pointer;}
+    .cfg-sel:focus{border-color:rgba(167,139,250,.4);}
+    .day-pills{display:flex;gap:3px;flex-wrap:wrap;}
+    .day-pill{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:var(--card2);color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .14s;user-select:none;}
+    .day-pill.on{background:var(--purple);border-color:var(--purple);color:#fff;}
+    .parity-btn{background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:11px;font-weight:600;padding:4px 7px;cursor:pointer;transition:all .14s;}
+    .parity-btn.on{background:rgba(139,92,246,.22);border-color:var(--purple);color:var(--evening);}
+    .month-inp{background:var(--card2);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:5px 8px;font-size:12px;font-family:inherit;outline:none;width:65px;}
+    .note-inp{margin-top:5px;width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:5px 9px;font-size:12px;font-family:inherit;outline:none;}
+    .note-inp::placeholder{color:var(--muted);}
+    .del-rt-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:2px 5px;border-radius:4px;}
+    .del-rt-btn:hover{color:var(--red);background:rgba(248,113,113,.1);}
+    .cfg-lbl{font-size:11px;color:var(--muted);white-space:nowrap;align-self:center;}
+    .add-rt-form{padding:10px 13px;border-top:1px solid var(--border);}
+    .add-rt-title{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:7px;text-transform:uppercase;letter-spacing:.3px;}
+    .add-rt-row{display:flex;gap:5px;flex-wrap:wrap;}
+    .add-rt-inp{flex:1;min-width:130px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:6px 8px;font-size:12px;font-family:inherit;outline:none;}
+    .add-rt-inp::placeholder{color:var(--muted);}
+    .add-rt-btn{background:var(--purple);color:#fff;border:none;border-radius:7px;padding:6px 11px;cursor:pointer;font-size:12px;font-weight:700;}
+    .add-rt-btn:hover{filter:brightness(1.1);}
+    .med-unit-sel{background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:4px 7px;font-size:11px;font-family:inherit;outline:none;margin-left:4px;}
+    @media(max-width:520px){.date-lbl{min-width:115px;font-size:10px;} .main{padding:12px 9px 50px;}}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback } = React;
+
+/* ══ DAILY TASK TEMPLATES ══ */
+const DAILY_TEMPLATES = [
+  {id:'lever',      label:'Heure de lever',       section:'matin',   type:'time',       icon:'⏰',enabled:false},
+  {id:'eau',        label:"Verre d'eau au lever",  section:'matin',   type:'check',      icon:'💧',enabled:false},
+  {id:'medic_am',   label:'Médicaments — heure',   section:'matin',   type:'check-time', icon:'💊',enabled:false},
+  {id:'cardio',     label:'Cardio',                section:'matin',   type:'check-note', icon:'🏃',enabled:false,ph:'Type, durée...'},
+  {id:'yoga',       label:'Yoga / Étirements',     section:'matin',   type:'check-note', icon:'🧘',enabled:false,ph:'Type, durée...'},
+  {id:'dejeuner',   label:'Déjeuner',              section:'matin',   type:'check',      icon:'🍳',enabled:false},
+  {id:'vaisselle_m',label:'Vaisselle du matin',    section:'matin',   type:'check',      icon:'🫧',enabled:false},
+  {id:'make_lit',   label:'Faire le lit',          section:'matin',   type:'check',      icon:'🛏️',enabled:false},
+  {id:'diner',      label:'Dîner',                 section:'journee', type:'check',      icon:'🥗',enabled:false},
+  {id:'hydro',      label:'Hydratation',           section:'journee', type:'water',      icon:'💧',enabled:false},
+  {id:'muscu',      label:'Musculation',           section:'journee', type:'check-note', icon:'💪',enabled:false,ph:'Groupes musculaires, durée...'},
+  {id:'marche',     label:'Marche / Promenade',    section:'journee', type:'check-note', icon:'🚶',enabled:false,ph:'Durée, lieu...'},
+  {id:'lecture',    label:'Lecture',               section:'journee', type:'check-note', icon:'📚',enabled:false,ph:'Titre, durée...'},
+  {id:'travail',    label:'Tâches de travail',     section:'journee', type:'check-note', icon:'💼',enabled:false,ph:"Ce que j'ai accompli..."},
+  {id:'souper',     label:'Souper',                section:'soir',    type:'check',      icon:'🍽️',enabled:false},
+  {id:'vaisselle_s',label:'Vaisselle du soir',     section:'soir',    type:'check',      icon:'🫧',enabled:false},
+  {id:'medic_pm',   label:'Médicaments — heure',   section:'soir',    type:'check-time', icon:'💊',enabled:false},
+  {id:'douche',     label:'Douche',                section:'soir',    type:'check',      icon:'🚿',enabled:false},
+  {id:'meditation', label:'Méditation',            section:'soir',    type:'check-note', icon:'🧘',enabled:false,ph:'Type, durée...'},
+  {id:'loisir',     label:'Loisir',                section:'soir',    type:'check-note', icon:'🎮',enabled:false,ph:'Activité...'},
+  {id:'prep',       label:'Préparer le lendemain', section:'soir',    type:'check',      icon:'📋',enabled:false},
+  {id:'lecture_s',  label:'Lecture du soir',       section:'soir',    type:'check-note', icon:'📖',enabled:false,ph:'Titre, durée...'},
+  {id:'gratitude',  label:'Note de gratitude',     section:'soir',    type:'textarea',   icon:'🙏',enabled:false,ph:'Trois choses pour lesquelles je suis reconnaissant(e)...'},
+  {id:'coucher',    label:'Heure de coucher',      section:'soir',    type:'time',       icon:'🌙',enabled:false},
+];
+
+/* ══ MEDICAL TEMPLATES ══ */
+const MEDICAL_TEMPLATES = [
+  // Cardiovasculaire
+  {id:'m_ta_am',   label:'Tension artérielle — matin', icon:'🩺', type:'bp',    grp:'cardio',    enabled:false},
+  {id:'m_ta_midi', label:'Tension artérielle — midi',  icon:'🩺', type:'bp',    grp:'cardio',    enabled:false},
+  {id:'m_ta_pm',   label:'Tension artérielle — soir',  icon:'🩺', type:'bp',    grp:'cardio',    enabled:false},
+  {id:'m_fc',      label:'Fréquence cardiaque',        icon:'❤️', type:'num',   grp:'cardio',    enabled:false, unit:'bpm',    ph:'72'},
+  {id:'m_spo2',    label:'Saturation O₂ (SpO2)',       icon:'🫁', type:'num',   grp:'cardio',    enabled:false, unit:'%',      ph:'98'},
+  // Glycémie
+  {id:'m_glyc_aj', label:'Glycémie — à jeun',          icon:'🩸', type:'num',   grp:'glyco',     enabled:false, unit:'mmol/L', ph:'5.2', altUnit:'mg/dL'},
+  {id:'m_glyc_av', label:'Glycémie — avant repas',     icon:'🩸', type:'num',   grp:'glyco',     enabled:false, unit:'mmol/L', ph:'5.5', altUnit:'mg/dL'},
+  {id:'m_glyc_ap', label:'Glycémie — après repas',     icon:'🩸', type:'num',   grp:'glyco',     enabled:false, unit:'mmol/L', ph:'7.0', altUnit:'mg/dL'},
+  {id:'m_glyc_co', label:'Glycémie — coucher',         icon:'🩸', type:'num',   grp:'glyco',     enabled:false, unit:'mmol/L', ph:'6.0', altUnit:'mg/dL'},
+  {id:'m_insuline',label:'Insuline',                   icon:'💉', type:'num',   grp:'glyco',     enabled:false, unit:'unités', ph:'10'},
+  // Général
+  {id:'m_poids',   label:'Poids',                      icon:'⚖️', type:'num',   grp:'general',   enabled:false, unit:'kg',     ph:'70.0', altUnit:'lbs', altPh:'154.3', convFactor:2.20462},
+  {id:'m_temp',    label:'Température corporelle',     icon:'🌡️', type:'num',   grp:'general',   enabled:false, unit:'°C',     ph:'37.0'},
+  {id:'m_sommeil', label:'Heures de sommeil',          icon:'💤', type:'num',   grp:'general',   enabled:false, unit:'h',      ph:'8'},
+  {id:'m_resp',    label:'Fréquence respiratoire',     icon:'🌬️', type:'num',   grp:'general',   enabled:false, unit:'resp/min',ph:'16'},
+  // Bien-être
+  {id:'m_douleur', label:'Douleur (0 = aucune)',       icon:'😣', type:'scale', grp:'wellbeing', enabled:false},
+  {id:'m_humeur',  label:'Humeur',                     icon:'😊', type:'mood',  grp:'wellbeing', enabled:false},
+  {id:'m_fatigue', label:'Fatigue (0 = reposé)',       icon:'😴', type:'scale', grp:'wellbeing', enabled:false},
+  {id:'m_energie', label:'Énergie (10 = max)',         icon:'⚡', type:'scale', grp:'wellbeing', enabled:false},
+  // Médicaments sur mesure
+  {id:'m_med1',    label:'Médicament personnalisé 1',  icon:'💊', type:'medpill',grp:'meds',      enabled:false, medName:''},
+  {id:'m_med2',    label:'Médicament personnalisé 2',  icon:'💊', type:'medpill',grp:'meds',      enabled:false, medName:''},
+  {id:'m_med3',    label:'Médicament personnalisé 3',  icon:'💊', type:'medpill',grp:'meds',      enabled:false, medName:''},
+];
+
+const MEDICAL_GROUPS = [
+  {id:'cardio',    label:'Cardiovasculaire',      icon:'🫀'},
+  {id:'glyco',     label:'Glycémie & Insuline',   icon:'🩸'},
+  {id:'general',   label:'Mesures générales',     icon:'📏'},
+  {id:'wellbeing', label:'Bien-être',             icon:'😊'},
+  {id:'meds',      label:'Médicaments sur mesure',icon:'💊'},
+];
+
+/* ══ ROUTINE TEMPLATES ══ */
+const ROUTINE_TEMPLATES = [
+  {id:'r_epicerie', label:"Liste d'épicerie",         icon:'🛒',cat:'maison', freq:'weekly',  days:[3],  wk:0,dm:1, enabled:false},
+  {id:'r_menu',     label:'Menu de la semaine',        icon:'🍽️',cat:'maison', freq:'weekly',  days:[0],  wk:0,dm:1, enabled:false},
+  {id:'r_lavage',   label:'Lavage',                    icon:'👕',cat:'maison', freq:'weekly',  days:[6],  wk:0,dm:1, enabled:false},
+  {id:'r_lavage2',  label:'Lavage (2e brassée)',       icon:'🧺',cat:'maison', freq:'weekly',  days:[2],  wk:0,dm:1, enabled:false},
+  {id:'r_aspir',    label:'Aspirateur',                icon:'🌀',cat:'maison', freq:'weekly',  days:[6],  wk:0,dm:1, enabled:false},
+  {id:'r_vadro',    label:'Vadrouille / Balayer',      icon:'🧹',cat:'maison', freq:'weekly',  days:[6],  wk:0,dm:1, enabled:false},
+  {id:'r_sdb',      label:'Nettoyage salle de bain',   icon:'🚿',cat:'maison', freq:'weekly',  days:[5],  wk:0,dm:1, enabled:false},
+  {id:'r_cuisine',  label:'Nettoyage cuisine',         icon:'🫧',cat:'maison', freq:'weekly',  days:[5],  wk:0,dm:1, enabled:false},
+  {id:'r_draps',    label:'Changer les draps',         icon:'🛏️',cat:'maison', freq:'biweekly',days:[6],  wk:0,dm:1, enabled:false},
+  {id:'r_poubelles',label:'Poubelles / Recyclage',     icon:'🗑️',cat:'maison', freq:'weekly',  days:[2],  wk:0,dm:1, enabled:false},
+  {id:'r_fenetres', label:'Nettoyer les fenêtres',     icon:'🪟',cat:'maison', freq:'monthly', days:[6],  wk:0,dm:1, enabled:false},
+  {id:'r_frigo',    label:'Nettoyer le réfrigérateur', icon:'🧊',cat:'maison', freq:'biweekly',days:[0],  wk:0,dm:1, enabled:false},
+  {id:'r_rangement',label:'Rangement général',         icon:'📦',cat:'maison', freq:'weekly',  days:[0],  wk:0,dm:1, enabled:false},
+  {id:'r_oiseaux',  label:'Nettoyer cache à oiseaux',  icon:'🐦',cat:'animaux',freq:'weekly',  days:[6],  wk:0,dm:1, enabled:false},
+  {id:'r_mangeoire',label:'Remplir la mangeoire',      icon:'🌾',cat:'animaux',freq:'2x-week', days:[1,4],wk:0,dm:1, enabled:false},
+  {id:'r_litiere',  label:'Litière du chat',           icon:'🐱',cat:'animaux',freq:'daily',   days:[],   wk:0,dm:1, enabled:false},
+  {id:'r_chien_b',  label:'Bain du chien',             icon:'🐕',cat:'animaux',freq:'monthly', days:[6],  wk:0,dm:1, enabled:false},
+  {id:'r_chien_br', label:'Brossage du chien',         icon:'🦮',cat:'animaux',freq:'weekly',  days:[3],  wk:0,dm:1, enabled:false},
+  {id:'r_lapin',    label:'Cage du lapin',             icon:'🐰',cat:'animaux',freq:'weekly',  days:[6],  wk:0,dm:1, enabled:false},
+  {id:'r_aquarium', label:"Eau de l'aquarium",         icon:'🐠',cat:'animaux',freq:'biweekly',days:[6],  wk:1,dm:1, enabled:false},
+  {id:'r_plantes',  label:'Arroser les plantes',       icon:'🌱',cat:'animaux',freq:'2x-week', days:[1,5],wk:0,dm:1, enabled:false},
+  {id:'r_cochon',   label:"Cage cochon d'Inde",        icon:'🐹',cat:'animaux',freq:'weekly',  days:[6],  wk:0,dm:1, enabled:false},
+  {id:'r_tortue',   label:'Tortue / Reptile',          icon:'🐢',cat:'animaux',freq:'weekly',  days:[6],  wk:0,dm:1, enabled:false},
+  {id:'r_pesee',    label:'Pesée hebdomadaire',        icon:'⚖️',cat:'sante',  freq:'weekly',  days:[1],  wk:0,dm:1, enabled:false},
+  {id:'r_rx',       label:'Renouveler prescriptions',  icon:'💊',cat:'sante',  freq:'monthly', days:[1],  wk:0,dm:1, enabled:false},
+  {id:'r_rdv',      label:'Rendez-vous médical',       icon:'🏥',cat:'sante',  freq:'monthly', days:[1],  wk:0,dm:1, enabled:false},
+  {id:'r_bilan',    label:'Bilan activité physique',   icon:'📊',cat:'sante',  freq:'weekly',  days:[0],  wk:0,dm:1, enabled:false},
+  {id:'r_budget',   label:'Vérifier le budget',        icon:'💰',cat:'finance',freq:'weekly',  days:[1],  wk:0,dm:1, enabled:false},
+  {id:'r_factures', label:'Payer les factures',        icon:'💳',cat:'finance',freq:'monthly', days:[1],  wk:0,dm:1, enabled:false},
+  {id:'r_epargne',  label:'Virement épargne',          icon:'🏦',cat:'finance',freq:'monthly', days:[1],  wk:0,dm:1, enabled:false},
+  {id:'r_specials', label:'Chercher les spéciaux',     icon:'🏷️',cat:'finance',freq:'weekly',  days:[3],  wk:0,dm:1, enabled:false},
+  {id:'r_coiffeur', label:'Rendez-vous coiffeur',      icon:'✂️',cat:'perso',  freq:'monthly', days:[6],  wk:0,dm:15,enabled:false},
+  {id:'r_soins',    label:'Soins personnels',          icon:'💆',cat:'perso',  freq:'weekly',  days:[6],  wk:0,dm:1, enabled:false},
+  {id:'r_voiture',  label:'Laver la voiture',          icon:'🚗',cat:'perso',  freq:'monthly', days:[6],  wk:0,dm:1, enabled:false},
+  {id:'r_social',   label:'Temps social / famille',    icon:'👨‍👩‍👧',cat:'perso',freq:'weekly',  days:[6],  wk:0,dm:1, enabled:false},
+  {id:'r_loisir_s', label:'Loisir hebdomadaire',       icon:'🎯',cat:'perso',  freq:'weekly',  days:[0],  wk:0,dm:1, enabled:false},
+];
+
+const DAILY_SECTIONS   = [{id:'matin',label:'Matin',icon:'🌅'},{id:'journee',label:'Journée',icon:'☀️'},{id:'soir',label:'Soir',icon:'🌙'}];
+const ROUTINE_CATS     = [{id:'maison',label:'Maison',icon:'🏠'},{id:'animaux',label:'Animaux',icon:'🐾'},{id:'sante',label:'Santé',icon:'🩺'},{id:'finance',label:'Finances',icon:'💰'},{id:'perso',label:'Personnel',icon:'👤'}];
+const FREQ_OPTS        = [{v:'daily',l:'Chaque jour'},{v:'2x-week',l:'2× / sem.'},{v:'3x-week',l:'3× / sem.'},{v:'weekly',l:'1× / sem.'},{v:'biweekly',l:'Aux 2 sem.'},{v:'triweekly',l:'Aux 3 sem.'},{v:'monthly',l:'1× / mois'}];
+const DTYPE_OPTS       = [{v:'check',l:'✓ Simple'},{v:'check-note',l:'✓ + note'},{v:'time',l:'⏰ Heure'}];
+const DAY_NAMES        = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+const WEEK_ORDER       = [1,2,3,4,5,6,0];
+const MOOD_EMOJIS      = ['😫','😔','😐','🙂','😄'];
+
+/* ══ HELPERS ══ */
+const todayStr = () => new Date().toISOString().split('T')[0];
+function shiftDate(d,n){ const dt=new Date(d+'T12:00:00'); dt.setDate(dt.getDate()+n); return dt.toISOString().split('T')[0]; }
+function fmtLong(d){ return new Date(d+'T12:00:00').toLocaleDateString('fr-CA',{weekday:'long',day:'numeric',month:'long',year:'numeric'}); }
+function fmtWeekRange(d){ const ds=getWeekDates(d); const a=new Date(ds[0]+'T12:00:00'),b=new Date(ds[6]+'T12:00:00'); return `Sem. du ${a.toLocaleDateString('fr-CA',{day:'numeric',month:'short'})} au ${b.toLocaleDateString('fr-CA',{day:'numeric',month:'short',year:'numeric'})}`; }
+function getWeekStart(d){ const dt=new Date(d+'T12:00:00'),dow=dt.getDay(),diff=dow===0?-6:1-dow,m=new Date(dt); m.setDate(dt.getDate()+diff); return m.toISOString().split('T')[0]; }
+function getWeekDates(d){ const s=new Date(getWeekStart(d)+'T12:00:00'); return Array.from({length:7},(_,i)=>{ const dd=new Date(s); dd.setDate(s.getDate()+i); return dd.toISOString().split('T')[0]; }); }
+function getISOWeek(d){ const dt=new Date(d+'T12:00:00'),j=new Date(dt.getFullYear(),0,4),m=new Date(j); m.setDate(j.getDate()-(j.getDay()||7)+1); return Math.floor((dt-m)/(7*86400000))+1; }
+function uid(){ return 'u'+Math.random().toString(36).slice(2)+Date.now().toString(36); }
+
+function routineOccursOn(rt,dateStr){
+  if(!rt.enabled) return false;
+  const d=new Date(dateStr+'T12:00:00'), dow=d.getDay();
+  switch(rt.freq){
+    case 'daily': return true;
+    case '2x-week': case '3x-week': case 'weekly': return (rt.days||[]).includes(dow);
+    case 'biweekly': return (rt.days||[]).includes(dow) && getISOWeek(dateStr)%2===(rt.wk||0);
+    case 'triweekly':return (rt.days||[]).includes(dow) && getISOWeek(dateStr)%3===(rt.wk||0);
+    case 'monthly':  return d.getDate()===(rt.dm||1);
+    default: return false;
+  }
+}
+
+function medHasData(item, data){
+  if(!data) return false;
+  if(item.type==='bp') return !!(data.sys||data.dia);
+  if(item.type==='num'||item.type==='medpill') return !!(data.val!==undefined&&data.val!=='');
+  if(item.type==='scale'||item.type==='mood') return data.val!==null&&data.val!==undefined;
+  return false;
+}
+
+function mergeTpl(templates, stored){
+  const map=Object.fromEntries((stored||[]).map(r=>[r.id,r]));
+  const base=templates.map(t=>map[t.id]?{...t,...map[t.id]}:t);
+  const custom=(stored||[]).filter(s=>!templates.find(t=>t.id===s.id));
+  return [...base,...custom];
+}
+
+function loadData(){ try{ return JSON.parse(localStorage.getItem('maJournee_v4')||'null')||{days:{},tasks:[],routines:[],dailyTasks:[],medTasks:[],weekNotes:{}}; }catch{ return {days:{},tasks:[],routines:[],dailyTasks:[],medTasks:[],weekNotes:{}}; } }
+function saveData(d){ try{ localStorage.setItem('maJournee_v4',JSON.stringify(d)); }catch{} }
+
+function calcProgress(day,customTasks,dailyTasks){
+  const checkable=dailyTasks.filter(t=>t.enabled&&['check','check-note','check-time'].includes(t.type));
+  const waterOn=dailyTasks.find(t=>t.id==='hydro'&&t.enabled);
+  let total=checkable.length+(waterOn?1:0), done=0;
+  checkable.forEach(t=>{ if(day?.checks?.[t.id]) done++; });
+  if(waterOn&&(day?.water||0)>=6) done++;
+  const pending=customTasks.filter(t=>!t.done);
+  total+=pending.length;
+  return total===0?0:Math.round((done/total)*100);
+}
+function motivMsg(p){ if(p===100)return['🏆','Journée parfaite !','Tu as tout accompli !']; if(p>=80)return['⭐','Excellent travail !','Tu es sur une belle lancée.']; if(p>=60)return['💪','Bonne progression !','Continue !']; if(p>=40)return['🌱','Bon élan !','Chaque tâche compte.']; if(p>=15)return['☕','La journée avance...','Tu peux le faire !']; return null; }
+
+/* ══ BASIC COMPONENTS ══ */
+function Chk({on,sec,onClick}){
+  return <div className={`chk ${sec} ${on?'on':''}`} onClick={onClick}><span className="chk-mark">✓</span></div>;
+}
+
+/* ══ DAILY TASK ITEM ══ */
+function TaskItem({task,sec,day,onCheck,onTime,onNote}){
+  const checked=!!day?.checks?.[task.id], timeVal=day?.times?.[task.id]||'', noteVal=day?.notes?.[task.id]||'';
+  if(task.type==='time') return(
+    <div className="time-row"><span style={{fontSize:16}}>{task.icon}</span><span className="time-lbl">{task.label}</span>
+      <input type="time" className="task-inp" value={timeVal} onChange={e=>onTime(task.id,e.target.value)}/>
+    </div>
+  );
+  if(task.type==='water'){
+    const g=day?.water||0;
+    return(<div className="water-row">
+      <div className="water-top"><span style={{fontSize:13}}>💧</span><span className="task-lbl">Hydratation</span><span className="water-cnt">{g}/8 verres</span></div>
+      <div className="glasses">{Array.from({length:8},(_,i)=><div key={i} className={`glass ${i<g?'full':''}`} onClick={()=>onNote('_water',i<g?i:i+1)}>{i<g?'💧':'○'}</div>)}</div>
+    </div>);
+  }
+  if(task.type==='textarea') return(
+    <div className="task-row"><span style={{fontSize:15,marginTop:1}}>{task.icon}</span>
+      <div className="task-body">
+        <div className="task-lbl-row" style={{cursor:'default'}}><span className="task-lbl">{task.label}</span></div>
+        <textarea className="task-inp" placeholder={task.ph} value={noteVal} onChange={e=>onNote(task.id,e.target.value)}/>
+      </div>
+    </div>
+  );
+  return(
+    <div className={`task-row ${checked?'done':''}`}>
+      <Chk on={checked} sec={sec} onClick={()=>onCheck(task.id)}/>
+      <div className="task-body">
+        <div className="task-lbl-row" onClick={()=>onCheck(task.id)}>
+          <span className="task-emoji">{task.icon}</span><span className="task-lbl">{task.label}</span>
+        </div>
+        {task.type==='check-time'&&<input type="time" className="task-inp" value={timeVal} onChange={e=>onTime(task.id,e.target.value)} onClick={e=>e.stopPropagation()}/>}
+        {task.type==='check-note'&&<input type="text" className="task-inp" placeholder={task.ph||'Note...'} value={noteVal} onChange={e=>onNote(task.id,e.target.value)} onClick={e=>e.stopPropagation()}/>}
+      </div>
+    </div>
+  );
+}
+
+function SectionCard({sec,tasks,day,onCheck,onTime,onNote}){
+  const secTasks=tasks.filter(t=>t.section===sec.id&&t.enabled);
+  if(secTasks.length===0) return null;
+  const checkable=secTasks.filter(t=>['check','check-note','check-time'].includes(t.type));
+  const done=checkable.filter(t=>day?.checks?.[t.id]).length;
+  return(
+    <div className="sec-card">
+      <div className={`sec-head ${sec.id}`}>
+        <span className="sec-icon">{sec.icon}</span>
+        <span className={`sec-title ${sec.id}`}>{sec.label}</span>
+        {checkable.length>0&&<span className="sec-badge">{done}/{checkable.length}</span>}
+      </div>
+      <div className="task-list">{secTasks.map(t=><TaskItem key={t.id} task={t} sec={sec.id} day={day} onCheck={onCheck} onTime={onTime} onNote={onNote}/>)}</div>
+    </div>
+  );
+}
+
+/* ══ MEDICAL ITEM ══ */
+function MedicalItem({item, medData, onUpdate}){
+  const data = medData?.[item.id] || {};
+  const done = medHasData(item, data);
+
+  function upd(patch){ onUpdate(item.id, {...data, ...patch}); }
+
+  // Scale button color logic
+  function scaleClass(val, selected){
+    if(val!==selected) return 'sc-btn';
+    if(val<=3) return 'sc-btn sel-lo';
+    if(val<=6) return 'sc-btn sel-mid';
+    return 'sc-btn sel-hi';
+  }
+
+  const isPain   = item.id==='m_douleur' || item.id==='m_fatigue';
+  const isEnergy = item.id==='m_energie';
+
+  return(
+    <div className="med-item">
+      <div className="med-hdr">
+        <span className="med-icon">{item.icon}</span>
+        <span className="med-label">
+          {item.type==='medpill'&&item.medName ? item.medName : item.label}
+        </span>
+        {done&&<span className="med-done">✓ Enregistré</span>}
+      </div>
+
+      {item.type==='bp' && (
+        <>
+          <div className="med-inputs">
+            <input className="med-num sm" type="number" placeholder="120" value={data.sys||''} onChange={e=>upd({sys:e.target.value})} min={60} max={250}/>
+            <span className="med-sep">/</span>
+            <input className="med-num sm" type="number" placeholder="80"  value={data.dia||''} onChange={e=>upd({dia:e.target.value})} min={40} max={150}/>
+            <span className="med-unit">mmHg</span>
+            <span style={{fontSize:13,margin:'0 2px'}}>❤️</span>
+            <input className="med-num sm" type="number" placeholder="72"  value={data.pulse||''} onChange={e=>upd({pulse:e.target.value})} min={30} max={220}/>
+            <span className="med-unit">bpm</span>
+            <input type="time" className="med-time" value={data.time||''} onChange={e=>upd({time:e.target.value})}/>
+          </div>
+          <input className="med-note" placeholder="Position, bras, conditions..." value={data.note||''} onChange={e=>upd({note:e.target.value})}/>
+        </>
+      )}
+
+      {item.type==='num' && (()=>{
+        const useAlt = data.useAlt !== undefined ? data.useAlt : !!(item.defaultAlt);
+        const curUnit = useAlt && item.altUnit ? item.altUnit : item.unit;
+        const curPh   = useAlt && item.altPh   ? item.altPh   : (item.ph||'—');
+        function toggleUnit(){
+          const toAlt = !useAlt;
+          let newVal = data.val;
+          if(item.convFactor && newVal){
+            const n = parseFloat(newVal);
+            if(!isNaN(n)) newVal = toAlt
+              ? (n * item.convFactor).toFixed(1)
+              : (n / item.convFactor).toFixed(1);
+          }
+          upd({useAlt: toAlt, val: newVal});
+        }
+        return(
+          <div className="med-inputs">
+            <input className="med-num" type="number" placeholder={curPh} value={data.val||''} onChange={e=>upd({val:e.target.value, useAlt})}/>
+            <span className="med-unit">{curUnit}</span>
+            {item.altUnit&&<span className="mini-link" style={{cursor:'pointer',fontSize:10}} title="Changer d'unité (convertit la valeur)" onClick={toggleUnit}>{useAlt ? item.unit : item.altUnit}</span>}
+            <input type="time" className="med-time" value={data.time||''} onChange={e=>upd({time:e.target.value})}/>
+          </div>
+        );
+      })()}
+
+      {item.type==='medpill' && (
+        <>
+          <div className="med-inputs">
+            <input className="task-inp" style={{marginTop:0,maxWidth:200}} type="text" placeholder="Nom, dosage..." value={data.val||''} onChange={e=>upd({val:e.target.value})}/>
+            <input type="time" className="med-time" value={data.time||''} onChange={e=>upd({time:e.target.value})}/>
+          </div>
+        </>
+      )}
+
+      {item.type==='scale' && (
+        <>
+          <div className="scale-row">
+            {Array.from({length:11},(_,i)=>(
+              <div key={i}
+                className={data.val===i?`sc-btn ${isPain?(i<=2?'sel-lo':i<=5?'sel-mid':'sel-hi'):(isEnergy?(i>=8?'sel-lo':i>=5?'sel-mid':'sel-hi'):'sel-lo')}` : 'sc-btn'}
+                onClick={()=>upd({val:data.val===i?null:i})}
+              >{i}</div>
+            ))}
+          </div>
+          <input className="med-note" placeholder="Contexte, localisation..." value={data.note||''} onChange={e=>upd({note:e.target.value})}/>
+        </>
+      )}
+
+      {item.type==='mood' && (
+        <>
+          <div className="mood-row">
+            {MOOD_EMOJIS.map((em,i)=>(
+              <span key={i} className={`mood-btn ${data.val===i?'sel':''}`}
+                onClick={()=>upd({val:data.val===i?null:i})}>{em}</span>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function MedicalSection({medItems, day, onUpdate}){
+  const active = medItems.filter(m=>m.enabled);
+  if(active.length===0) return null;
+  const medData = day?.medical || {};
+  const done = active.filter(m=>medHasData(m, medData[m.id])).length;
+
+  // Group by grp
+  const groups = MEDICAL_GROUPS.filter(g=>active.some(m=>m.grp===g.id));
+
+  return(
+    <div className="sec-card">
+      <div className="sec-head medical">
+        <span className="sec-icon">🏥</span>
+        <span className="sec-title medical">Suivi médical</span>
+        <span className={`sec-badge ${done===active.length&&active.length>0?'green':''}`}>{done}/{active.length}</span>
+      </div>
+      {groups.map(g=>{
+        const gItems=active.filter(m=>m.grp===g.id);
+        return(
+          <div key={g.id}>
+            <div className="med-grp-hdr">{g.icon} {g.label}</div>
+            {gItems.map(item=>(
+              <MedicalItem key={item.id} item={item} medData={medData}
+                onUpdate={(id,patch)=>onUpdate(id,patch)}/>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ══ ROUTINES SECTION ══ */
+function RoutinesSection({routines,dateStr,day,onToggle}){
+  const list=routines.filter(r=>routineOccursOn(r,dateStr));
+  if(list.length===0) return null;
+  const done=list.filter(r=>day?.routineChecks?.[r.id]).length;
+  return(
+    <div className="sec-card">
+      <div className="sec-head routines"><span className="sec-icon">🔄</span><span className="sec-title routines">Routines du jour</span><span className="sec-badge">{done}/{list.length}</span></div>
+      <div className="task-list">{list.map(r=>{
+        const checked=!!day?.routineChecks?.[r.id];
+        return(<div key={r.id} className={`task-row ${checked?'done':''}`}>
+          <Chk on={checked} sec="routines" onClick={()=>onToggle(r.id)}/>
+          <div className="task-body"><div className="task-lbl-row" onClick={()=>onToggle(r.id)}>
+            <span className="task-emoji">{r.icon}</span><span className="task-lbl">{r.label}</span>
+            {r.note&&<span style={{fontSize:11,color:'var(--muted)',marginLeft:4}}>— {r.note}</span>}
+          </div></div>
+        </div>);
+      })}</div>
+    </div>
+  );
+}
+
+/* ══ CUSTOM TASKS ══ */
+function CustomTasks({tasks,currentDate,onAdd,onToggle,onDelete}){
+  const [input,setInput]=useState('');
+  const [showDone,setShowDone]=useState(false);
+  const active=tasks.filter(t=>!t.done), done=tasks.filter(t=>t.done);
+  const carryN=active.filter(t=>t.createdDate<currentDate).length;
+  function handleAdd(){ const v=input.trim(); if(!v)return; onAdd(v); setInput(''); }
+  return(
+    <div className="sec-card">
+      <div className="sec-head custom"><span className="sec-icon">📝</span><span className="sec-title custom">Tâches du jour</span>
+        {carryN>0&&<span className="co-badge">{carryN} reportée{carryN>1?'s':''}</span>}
+        {active.length>0&&<span className="sec-badge" style={{marginLeft:carryN>0?4:'auto'}}>{active.length}</span>}
+      </div>
+      <div className="add-form"><input className="add-inp" placeholder="Ajouter une tâche..." value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&handleAdd()}/><button className="add-btn" onClick={handleAdd}>+ Ajouter</button></div>
+      {active.length===0?<div className="empty-note">Aucune tâche. Ajoutez-en une ci-dessus !</div>
+        :active.map(t=>(<div key={t.id} className={`cust-item ${t.done?'done':''}`}>
+          <Chk on={t.done} sec="custom" onClick={()=>onToggle(t.id)}/><span className="cust-txt">{t.text}</span>
+          {t.createdDate<currentDate&&!t.done&&<span className="carry-tag">reportée</span>}
+          <button className="del-btn" onClick={()=>onDelete(t.id)}>✕</button>
+        </div>))
+      }
+      {done.length>0&&<>
+        <div className="done-toggle" onClick={()=>setShowDone(v=>!v)}>{showDone?'▲':'▼'} {done.length} complétée{done.length>1?'s':''}</div>
+        {showDone&&done.map(t=><div key={t.id} className="done-item"><Chk on={true} sec="custom" onClick={()=>onToggle(t.id)}/><span className="done-txt">{t.text}</span><button className="del-btn" onClick={()=>onDelete(t.id)}>✕</button></div>)}
+      </>}
+    </div>
+  );
+}
+
+/* ══ WEEK VIEW ══ */
+function WeekView({currentDate,data,routines,dailyTasks,onDateClick,onRtToggle,onNoteChange}){
+  const dates=getWeekDates(currentDate), td=todayStr(), wk=getWeekStart(currentDate);
+  const weekNote=data.weekNotes?.[wk]||'';
+  const checkable=dailyTasks.filter(t=>t.enabled&&['check','check-note','check-time'].includes(t.type));
+  const totalFixed=checkable.length+1;
+  return(
+    <div>
+      <div className="week-sec-title" style={{marginBottom:9}}>Vue hebdomadaire</div>
+      <div className="week-wrap"><div className="week-grid">
+        {dates.map(ds=>{
+          const d=new Date(ds+'T12:00:00'), dow=d.getDay(), dd=data.days?.[ds]||{};
+          const dayRts=routines.filter(r=>routineOccursOn(r,ds));
+          const dailyDone=checkable.filter(t=>dd.checks?.[t.id]).length;
+          const prog=Math.round(((dailyDone+((dd.water||0)>=6?1:0))/totalFixed)*100);
+          return(<div key={ds} className={`day-col ${ds===td?'today-col':''}`} onClick={()=>onDateClick(ds)}>
+            <div className="day-col-hdr"><div className="day-name">{DAY_NAMES[dow]}</div><div className="day-num">{d.getDate()}</div></div>
+            {prog>0&&<div className="day-pb"><div className="day-pb-fill" style={{width:prog+'%'}}/></div>}
+            <div className="day-rt-list">{dayRts.length===0?<div className="no-rt-day">–</div>
+              :dayRts.map(r=>{
+                const checked=!!dd.routineChecks?.[r.id];
+                return(<div key={r.id} className={`day-rt-item ${checked?'done':''}`}>
+                  <div className={`day-rt-chk ${checked?'on':''}`} onClick={e=>{e.stopPropagation();onRtToggle(ds,r.id);}}><span className="mini-mark">✓</span></div>
+                  <span className="day-rt-lbl">{r.icon} {r.label}</span>
+                </div>);
+              })
+            }</div>
+          </div>);
+        })}
+      </div></div>
+      <div className="week-note-area" style={{marginTop:16}}>
+        <div className="week-sec-title">📋 Notes & Menu de la semaine</div>
+        <textarea className="week-note-inp" placeholder={"Menu de la semaine :\n  Lun : ...\n\nListe d'épicerie :\n  –\n\nSpéciaux :\n  –"} value={weekNote} onChange={e=>onNoteChange(wk,e.target.value)}/>
+      </div>
+    </div>
+  );
+}
+
+/* ══ CONFIG ══ */
+function DayPills({selected,multi,onChange}){
+  function toggle(d){ if(!multi){onChange([d]);return;} const s=selected.includes(d)?selected.filter(x=>x!==d):[...selected,d]; onChange(s); }
+  return(<div className="day-pills">{WEEK_ORDER.map(d=><div key={d} className={`day-pill ${selected.includes(d)?'on':''}`} onClick={()=>toggle(d)}>{DAY_NAMES[d]}</div>)}</div>);
+}
+
+function RoutineConfigItem({rt,onUpdate,onDelete}){
+  const multi=['2x-week','3x-week'].includes(rt.freq);
+  const needDay=!['daily','monthly'].includes(rt.freq);
+  const needPar=['biweekly','triweekly'].includes(rt.freq);
+  return(<div className="rt-item">
+    <div className="rt-item-top">
+      <span className="rt-icon">{rt.icon}</span><span className={`rt-label ${rt.enabled?'':'disabled'}`}>{rt.label}</span>
+      {rt.custom&&<button className="del-rt-btn" onClick={()=>onDelete(rt.id)}>🗑</button>}
+      <label className="toggle-sw"><input type="checkbox" checked={rt.enabled} onChange={e=>onUpdate(rt.id,{enabled:e.target.checked})}/><span className="sw-slider"/></label>
+    </div>
+    {rt.enabled&&<div className="rt-controls">
+      <span className="cfg-lbl">Fréquence :</span>
+      <select className="cfg-sel" value={rt.freq} onChange={e=>onUpdate(rt.id,{freq:e.target.value,days:[]})}>
+        {FREQ_OPTS.map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
+      </select>
+      {needDay&&<><span className="cfg-lbl">Jour{multi?'s':''} :</span><DayPills selected={rt.days||[]} multi={multi} onChange={days=>onUpdate(rt.id,{days})}/></>}
+      {needPar&&rt.freq==='biweekly'&&<><span className="cfg-lbl">Sem. :</span>{[{v:0,l:'A'},{v:1,l:'B'}].map(o=><button key={o.v} className={`parity-btn ${(rt.wk||0)===o.v?'on':''}`} onClick={()=>onUpdate(rt.id,{wk:o.v})}>{o.l}</button>)}</>}
+      {needPar&&rt.freq==='triweekly'&&<><span className="cfg-lbl">Cycle :</span>{[{v:0,l:'1'},{v:1,l:'2'},{v:2,l:'3'}].map(o=><button key={o.v} className={`parity-btn ${(rt.wk||0)===o.v?'on':''}`} onClick={()=>onUpdate(rt.id,{wk:o.v})}>{o.l}</button>)}</>}
+      {rt.freq==='monthly'&&<><span className="cfg-lbl">Jour du mois :</span><input type="number" className="month-inp" min={1} max={28} value={rt.dm||1} onChange={e=>onUpdate(rt.id,{dm:parseInt(e.target.value)||1})}/></>}
+      <input className="note-inp" placeholder="Note (optionnel)..." value={rt.note||''} onChange={e=>onUpdate(rt.id,{note:e.target.value})}/>
+    </div>}
+  </div>);
+}
+
+function DailyConfigItem({task,onUpdate,onDelete}){
+  return(<div className="rt-item">
+    <div className="rt-item-top">
+      <span className="rt-icon">{task.icon}</span><span className={`rt-label ${task.enabled?'':'disabled'}`}>{task.label}</span>
+      {task.custom&&<button className="del-rt-btn" onClick={()=>onDelete(task.id)}>🗑</button>}
+      <label className="toggle-sw"><input type="checkbox" checked={task.enabled} onChange={e=>onUpdate(task.id,{enabled:e.target.checked})}/><span className="sw-slider"/></label>
+    </div>
+  </div>);
+}
+
+function MedicalConfigItem({item,onUpdate,onDelete}){
+  return(<div className="rt-item">
+    <div className="rt-item-top">
+      <span className="rt-icon">{item.icon}</span>
+      <span className={`rt-label ${item.enabled?'':'disabled'}`}>{item.label}</span>
+      {item.custom&&<button className="del-rt-btn" onClick={()=>onDelete(item.id)}>🗑</button>}
+      <label className="toggle-sw"><input type="checkbox" checked={item.enabled} onChange={e=>onUpdate(item.id,{enabled:e.target.checked})}/><span className="sw-slider"/></label>
+    </div>
+    {/* Special: unit preference for items with altUnit (e.g. weight kg/lbs) */}
+    {item.enabled&&item.altUnit&&(
+      <div style={{marginTop:6,display:'flex',alignItems:'center',gap:6}}>
+        <span style={{fontSize:11,color:'var(--muted)'}}>Unité par défaut :</span>
+        <button
+          style={{padding:'3px 9px',borderRadius:6,border:'1.5px solid',fontSize:11,fontWeight:700,cursor:'pointer',
+            background:!item.defaultAlt?'rgba(251,191,36,.18)':'var(--card2)',
+            borderColor:!item.defaultAlt?'var(--orange)':'var(--border)',
+            color:!item.defaultAlt?'var(--orange)':'var(--muted)'}}
+          onClick={()=>onUpdate(item.id,{defaultAlt:false})}>{item.unit}</button>
+        <button
+          style={{padding:'3px 9px',borderRadius:6,border:'1.5px solid',fontSize:11,fontWeight:700,cursor:'pointer',
+            background:item.defaultAlt?'rgba(251,191,36,.18)':'var(--card2)',
+            borderColor:item.defaultAlt?'var(--orange)':'var(--border)',
+            color:item.defaultAlt?'var(--orange)':'var(--muted)'}}
+          onClick={()=>onUpdate(item.id,{defaultAlt:true})}>{item.altUnit}</button>
+      </div>
+    )}
+    {/* Special: allow naming custom medication pills */}
+    {item.enabled&&item.type==='medpill'&&(
+      <div style={{marginTop:6}}>
+        <input className="note-inp" placeholder="Nom du médicament, dosage..." value={item.medName||''} onChange={e=>onUpdate(item.id,{medName:e.target.value})}/>
+      </div>
+    )}
+  </div>);
+}
+
+function Accordion({icon,label,color,count,children,startOpen}){
+  const [open,setOpen]=useState(startOpen!==false);
+  return(<div className="cfg-cat">
+    <div className={`cfg-cat-hdr ${open?'':'closed'}`} onClick={()=>setOpen(v=>!v)}>
+      <span className="cfg-cat-icon">{icon}</span>
+      <span className="cfg-cat-label" style={color?{color}:{}}>{label}</span>
+      {count>0&&<span className="cfg-cat-count">✓ {count}</span>}
+      <span className={`cfg-cat-arrow ${open?'open':''}`}>▶</span>
+    </div>
+    {open&&<div className="cfg-cat-body">{children}</div>}
+  </div>);
+}
+
+function DailySectionAccordion({sec,tasks,onUpdate,onDelete,onAdd}){
+  const [newLabel,setNewLabel]=useState('');
+  const [newIcon,setNewIcon]=useState('');
+  const [newType,setNewType]=useState('check');
+  const secTasks=tasks.filter(t=>t.section===sec.id);
+  const enabledN=secTasks.filter(t=>t.enabled).length;
+  const colors={matin:'var(--morning)',journee:'var(--day)',soir:'var(--evening)'};
+  function handleAdd(){ if(!newLabel.trim())return; onAdd({id:uid(),label:newLabel.trim(),icon:newIcon.trim()||'📌',section:sec.id,type:newType,enabled:true,custom:true,ph:'Note...'}); setNewLabel('');setNewIcon(''); }
+  function toggleAll(val){ secTasks.forEach(t=>onUpdate(t.id,{enabled:val})); }
+  return(<Accordion icon={sec.icon} label={sec.label} color={colors[sec.id]} count={enabledN}>
+    <div className="cfg-tools-row"><span style={{fontSize:11,color:'var(--muted)',flex:1,alignSelf:'center'}}>Activez les tâches souhaitées</span><span className="mini-link" onClick={()=>toggleAll(true)}>Tout ✓</span><span className="mini-link" onClick={()=>toggleAll(false)}>Tout ✗</span></div>
+    {secTasks.map(t=><DailyConfigItem key={t.id} task={t} onUpdate={onUpdate} onDelete={onDelete}/>)}
+    <div className="add-rt-form"><div className="add-rt-title">+ Tâche personnalisée</div>
+      <div className="add-rt-row">
+        <input className="add-rt-inp" style={{maxWidth:48}} placeholder="🏷️" value={newIcon} onChange={e=>setNewIcon(e.target.value)}/>
+        <input className="add-rt-inp" placeholder="Nom..." value={newLabel} onChange={e=>setNewLabel(e.target.value)} onKeyDown={e=>e.key==='Enter'&&handleAdd()}/>
+        <select className="cfg-sel" value={newType} onChange={e=>setNewType(e.target.value)}>{DTYPE_OPTS.map(o=><option key={o.v} value={o.v}>{o.l}</option>)}</select>
+        <button className="add-rt-btn" onClick={handleAdd}>+</button>
+      </div>
+    </div>
+  </Accordion>);
+}
+
+function MedicalAccordion({medItems,onUpdate,onDelete,onAdd}){
+  const [newLabel,setNewLabel]=useState('');
+  const [newIcon,setNewIcon]=useState('');
+  const [selGrp,setSelGrp]=useState('general');
+  const enabledN=medItems.filter(m=>m.enabled).length;
+  function handleAdd(){ if(!newLabel.trim())return; onAdd({id:uid(),label:newLabel.trim(),icon:newIcon.trim()||'🔬',type:'num',grp:selGrp,enabled:true,custom:true,unit:'',ph:''}); setNewLabel('');setNewIcon(''); }
+  function toggleAll(val){ medItems.forEach(m=>onUpdate(m.id,{enabled:val})); }
+  return(<Accordion icon="🏥" label="Suivi médical" color="var(--medical)" count={enabledN} startOpen={false}>
+    <div className="cfg-tools-row"><span style={{fontSize:11,color:'var(--muted)',flex:1,alignSelf:'center'}}>Tension, glycémie, humeur...</span><span className="mini-link" onClick={()=>toggleAll(true)}>Tout ✓</span><span className="mini-link" onClick={()=>toggleAll(false)}>Tout ✗</span></div>
+    {MEDICAL_GROUPS.map(g=>{
+      const gItems=medItems.filter(m=>m.grp===g.id);
+      if(gItems.length===0) return null;
+      return(<div key={g.id}>
+        <div className="med-grp-hdr" style={{background:'transparent'}}>{g.icon} {g.label}</div>
+        {gItems.map(m=><MedicalConfigItem key={m.id} item={m} onUpdate={onUpdate} onDelete={onDelete}/>)}
+      </div>);
+    })}
+    <div className="add-rt-form"><div className="add-rt-title">+ Mesure personnalisée</div>
+      <div className="add-rt-row">
+        <input className="add-rt-inp" style={{maxWidth:48}} placeholder="🔬" value={newIcon} onChange={e=>setNewIcon(e.target.value)}/>
+        <input className="add-rt-inp" placeholder="Nom de la mesure..." value={newLabel} onChange={e=>setNewLabel(e.target.value)} onKeyDown={e=>e.key==='Enter'&&handleAdd()}/>
+        <select className="cfg-sel" value={selGrp} onChange={e=>setSelGrp(e.target.value)}>{MEDICAL_GROUPS.map(g=><option key={g.id} value={g.id}>{g.label}</option>)}</select>
+        <button className="add-rt-btn" onClick={handleAdd}>+</button>
+      </div>
+    </div>
+  </Accordion>);
+}
+
+function RoutineCatAccordion({cat,routines,onUpdate,onDelete,onAdd}){
+  const [newLabel,setNewLabel]=useState('');
+  const [newIcon,setNewIcon]=useState('');
+  const catRts=routines.filter(r=>r.cat===cat.id);
+  const enabledN=catRts.filter(r=>r.enabled).length;
+  function handleAdd(){ if(!newLabel.trim())return; onAdd({id:uid(),label:newLabel.trim(),icon:newIcon.trim()||'📌',cat:cat.id,freq:'weekly',days:[6],wk:0,dm:1,enabled:true,custom:true,note:''}); setNewLabel('');setNewIcon(''); }
+  function toggleAll(val){ catRts.forEach(r=>onUpdate(r.id,{enabled:val})); }
+  return(<Accordion icon={cat.icon} label={cat.label} count={enabledN} startOpen={false}>
+    <div className="cfg-tools-row"><span style={{fontSize:11,color:'var(--muted)',flex:1,alignSelf:'center'}}>Activez et configurez</span><span className="mini-link" onClick={()=>toggleAll(true)}>Tout ✓</span><span className="mini-link" onClick={()=>toggleAll(false)}>Tout ✗</span></div>
+    {catRts.map(r=><RoutineConfigItem key={r.id} rt={r} onUpdate={onUpdate} onDelete={onDelete}/>)}
+    <div className="add-rt-form"><div className="add-rt-title">+ Routine personnalisée</div>
+      <div className="add-rt-row">
+        <input className="add-rt-inp" style={{maxWidth:48}} placeholder="🏷️" value={newIcon} onChange={e=>setNewIcon(e.target.value)}/>
+        <input className="add-rt-inp" placeholder="Nom..." value={newLabel} onChange={e=>setNewLabel(e.target.value)} onKeyDown={e=>e.key==='Enter'&&handleAdd()}/>
+        <button className="add-rt-btn" onClick={handleAdd}>+</button>
+      </div>
+    </div>
+  </Accordion>);
+}
+
+function ConfigView({dailyTasks,medItems,routines,onUpdD,onDelD,onAddD,onUpdM,onDelM,onAddM,onUpdR,onDelR,onAddR}){
+  const total=dailyTasks.filter(t=>t.enabled).length+medItems.filter(m=>m.enabled).length+routines.filter(r=>r.enabled).length;
+  return(<div>
+    <div className="cfg-intro">
+      <div className="cfg-intro-t">⚙️ Configuration de ma journée</div>
+      <div className="cfg-intro-s">Activez uniquement ce qui vous convient. Tout est désactivé par défaut — construisez votre routine idéale.{total>0&&<> · <strong style={{color:'var(--green)'}}>{total} activée{total>1?'s':''}</strong></>}</div>
+    </div>
+    <div style={{fontSize:12,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:8,paddingLeft:2}}>📅 Tâches quotidiennes</div>
+    {DAILY_SECTIONS.map(sec=><DailySectionAccordion key={sec.id} sec={sec} tasks={dailyTasks} onUpdate={onUpdD} onDelete={onDelD} onAdd={onAddD}/>)}
+    <div style={{fontSize:12,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'.5px',margin:'14px 0 8px',paddingLeft:2}}>🏥 Santé & Médical</div>
+    <MedicalAccordion medItems={medItems} onUpdate={onUpdM} onDelete={onDelM} onAdd={onAddM}/>
+    <div style={{fontSize:12,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'.5px',margin:'14px 0 8px',paddingLeft:2}}>🔄 Routines récurrentes</div>
+    {ROUTINE_CATS.map(cat=><RoutineCatAccordion key={cat.id} cat={cat} routines={routines} onUpdate={onUpdR} onDelete={onDelR} onAdd={onAddR}/>)}
+  </div>);
+}
+
+/* ══ APP ══ */
+function App(){
+  const [data,setData]=useState(loadData);
+  const [date,setDate]=useState(todayStr);
+  const [tab,setTab]=useState('day');
+
+  useEffect(()=>{ saveData(data); },[data]);
+
+  const dailyTasks = mergeTpl(DAILY_TEMPLATES,  data.dailyTasks);
+  const medItems   = mergeTpl(MEDICAL_TEMPLATES, data.medTasks);
+  const routines   = mergeTpl(ROUTINE_TEMPLATES, data.routines);
+  const day        = data.days?.[date]||{};
+  const customTasks= data.tasks||[];
+  const progress   = calcProgress(day,customTasks,dailyTasks);
+  const motiv      = motivMsg(progress);
+  const isToday    = date===todayStr();
+  const anyEnabled = dailyTasks.some(t=>t.enabled)||medItems.some(m=>m.enabled)||routines.some(r=>r.enabled);
+
+  function updateDay(fn){ setData(d=>({...d,days:{...d.days,[date]:fn(d.days?.[date]||{})}})); }
+  function updateDayFor(ds,fn){ setData(d=>({...d,days:{...d.days,[ds]:fn(d.days?.[ds]||{})}})); }
+
+  const onCheck  = id=>updateDay(d=>({...d,checks:{...d.checks,[id]:!d.checks?.[id]}}));
+  const onTime   = (id,v)=>updateDay(d=>({...d,times:{...d.times,[id]:v}}));
+  const onNote   = (id,v)=>id==='_water'?updateDay(d=>({...d,water:v})):updateDay(d=>({...d,notes:{...d.notes,[id]:v}}));
+  const onRtTog  = id=>updateDay(d=>({...d,routineChecks:{...d.routineChecks,[id]:!d.routineChecks?.[id]}}));
+  const onRtFor  = (ds,id)=>updateDayFor(ds,d=>({...d,routineChecks:{...d.routineChecks,[id]:!d.routineChecks?.[id]}}));
+  const onMedUpd = (id,patch)=>updateDay(d=>({...d,medical:{...d.medical,[id]:patch}}));
+
+  const onAddTask    = text=>{ const t={id:uid(),text,createdDate:date,done:false}; setData(d=>({...d,tasks:[...(d.tasks||[]),t]})); };
+  const onToggleTask = id=>setData(d=>({...d,tasks:(d.tasks||[]).map(t=>t.id===id?{...t,done:!t.done}:t)}));
+  const onDeleteTask = id=>setData(d=>({...d,tasks:(d.tasks||[]).filter(t=>t.id!==id)}));
+
+  function updDaily(id,patch){ setData(d=>{ const s=d.dailyTasks||[]; const e=s.find(t=>t.id===id); if(e)return{...d,dailyTasks:s.map(t=>t.id===id?{...t,...patch}:t)}; const tpl=DAILY_TEMPLATES.find(t=>t.id===id); return{...d,dailyTasks:[...s,{...(tpl||{id}),...patch,id}]}; }); }
+  const delDaily = id=>setData(d=>({...d,dailyTasks:(d.dailyTasks||[]).filter(t=>t.id!==id)}));
+  const addDaily = t=>setData(d=>({...d,dailyTasks:[...(d.dailyTasks||[]),t]}));
+
+  function updMed(id,patch){ setData(d=>{ const s=d.medTasks||[]; const e=s.find(m=>m.id===id); if(e)return{...d,medTasks:s.map(m=>m.id===id?{...m,...patch}:m)}; const tpl=MEDICAL_TEMPLATES.find(m=>m.id===id); return{...d,medTasks:[...s,{...(tpl||{id}),...patch,id}]}; }); }
+  const delMed = id=>setData(d=>({...d,medTasks:(d.medTasks||[]).filter(m=>m.id!==id)}));
+  const addMed = m=>setData(d=>({...d,medTasks:[...(d.medTasks||[]),m]}));
+
+  function updRt(id,patch){ setData(d=>{ const s=d.routines||[]; const e=s.find(r=>r.id===id); if(e)return{...d,routines:s.map(r=>r.id===id?{...r,...patch}:r)}; const tpl=ROUTINE_TEMPLATES.find(r=>r.id===id); return{...d,routines:[...s,{...(tpl||{id}),...patch,id}]}; }); }
+  const delRt = id=>setData(d=>({...d,routines:(d.routines||[]).filter(r=>r.id!==id)}));
+  const addRt = r=>setData(d=>({...d,routines:[...(d.routines||[]),r]}));
+  const onNoteChange=(wk,val)=>setData(d=>({...d,weekNotes:{...d.weekNotes,[wk]:val}}));
+  const onDateClick=ds=>{ setDate(ds); setTab('day'); };
+
+  function navPrev(){ setDate(d=>tab==='week'?shiftDate(d,-7):shiftDate(d,-1)); }
+  function navNext(){ setDate(d=>tab==='week'?shiftDate(d, 7):shiftDate(d, 1)); }
+  const hdrLabel = tab==='day'?fmtLong(date):tab==='week'?fmtWeekRange(date):'⚙️ Configuration';
+
+  return(<div>
+    {/* HEADER */}
+    <div className="hdr">
+      <div className="hdr-top">
+        <div className="app-title">✨ Ma Journée</div>
+        <div className="date-nav">
+          {tab!=='routines'&&<button className="nav-btn" onClick={navPrev}>‹</button>}
+          <div className="date-lbl">{hdrLabel}</div>
+          {tab!=='routines'&&<button className="nav-btn" onClick={navNext}>›</button>}
+          {!isToday&&tab!=='routines'&&<button className="today-pill" onClick={()=>{setDate(todayStr());setTab('day');}}>Aujourd'hui</button>}
+        </div>
+      </div>
+      {tab==='day'&&<div className="prog-row">
+        <span className="prog-emoji">{progress===100?'🏆':progress>=80?'⭐':progress>=50?'💪':progress>=20?'🌱':'🌙'}</span>
+        <div className="prog-track"><div className="prog-fill" style={{width:progress+'%'}}/></div>
+        <span className="prog-pct" style={{color:progress>=80?'var(--green)':'var(--muted)'}}>{progress}%</span>
+      </div>}
+      <div className="tab-nav">
+        <button className={`tab-btn ${tab==='day'?'active':''}`} onClick={()=>setTab('day')}><span className="ti">📅</span>Aujourd'hui</button>
+        <button className={`tab-btn ${tab==='week'?'active':''}`} onClick={()=>setTab('week')}><span className="ti">🗓️</span>Semaine</button>
+        <button className={`tab-btn ${tab==='routines'?'active':''}`} onClick={()=>setTab('routines')}><span className="ti">⚙️</span>Config.</button>
+      </div>
+    </div>
+
+    <div className="main">
+      {tab==='day'&&<>
+        {!anyEnabled&&(<div className="welcome">
+          <div className="welcome-icon">👋</div>
+          <div className="welcome-title">Bienvenue dans Ma Journée !</div>
+          <div className="welcome-sub">Commencez par choisir vos tâches, votre suivi médical et vos routines dans la configuration. Activez uniquement ce qui vous convient.</div>
+          <button className="welcome-btn" onClick={()=>setTab('routines')}>⚙️ Configurer mes tâches →</button>
+        </div>)}
+        {anyEnabled&&motiv&&<div className="motiv"><div className="motiv-icon">{motiv[0]}</div><div className="motiv-title">{motiv[1]}</div><div className="motiv-sub">{motiv[2]}</div></div>}
+        {DAILY_SECTIONS.map(sec=><SectionCard key={sec.id} sec={sec} tasks={dailyTasks} day={day} onCheck={onCheck} onTime={onTime} onNote={onNote}/>)}
+        <MedicalSection medItems={medItems} day={day} onUpdate={onMedUpd}/>
+        <RoutinesSection routines={routines} dateStr={date} day={day} onToggle={onRtTog}/>
+        <CustomTasks tasks={customTasks} currentDate={date} onAdd={onAddTask} onToggle={onToggleTask} onDelete={onDeleteTask}/>
+      </>}
+
+      {tab==='week'&&<WeekView currentDate={date} data={data} routines={routines} dailyTasks={dailyTasks} onDateClick={onDateClick} onRtToggle={onRtFor} onNoteChange={onNoteChange}/>}
+
+      {tab==='routines'&&<ConfigView dailyTasks={dailyTasks} medItems={medItems} routines={routines}
+        onUpdD={updDaily} onDelD={delDaily} onAddD={addDaily}
+        onUpdM={updMed}   onDelM={delMed}   onAddM={addMed}
+        onUpdR={updRt}    onDelR={delRt}    onAddR={addRt}/>}
+    </div>
+  </div>);
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SERVICE WORKER (PWA – mode hors-ligne)
+     Enregistré inline via Blob URL pour fichier HTML autonome
+════════════════════════════════════════════════════════════ -->
+<script>
+if('serviceWorker' in navigator){
+  const SW_CODE = `
+const CACHE = 'ma-journee-v1';
+const CDN = [
+  'https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js'
+];
+
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll(CDN)).then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', e => {
+  const url = e.request.url;
+  if(CDN.some(u => url.includes(u.split('/').pop()))){
+    e.respondWith(
+      caches.match(e.request).then(r => r || fetch(e.request).then(resp => {
+        const clone = resp.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+        return resp;
+      }))
+    );
+    return;
+  }
+  if(e.request.mode === 'navigate'){
+    e.respondWith(
+      fetch(e.request).catch(() => caches.match(e.request))
+    );
+  }
+});
+`;
+  const blob = new Blob([SW_CODE], {type:'text/javascript'});
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl, {scope:'./'})
+    .then(r => console.log('[PWA] Service worker enregistré', r.scope))
+    .catch(e => console.warn('[PWA] Service worker non disponible :', e.message));
+}
+</script>
+</body>
+</html>
