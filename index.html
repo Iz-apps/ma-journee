@@ -201,6 +201,27 @@ header{background:var(--primary);color:#fff;padding:calc(14px + var(--safe-top))
 .epic-empty{text-align:center;padding:32px 0;color:var(--sub)}
 .epic-empty span{display:block;font-size:2.5rem;margin-bottom:8px}
 
+/* ── SOUS-ONGLETS ÉPICERIE ── */
+.epic-subtabs{display:flex;gap:0;background:var(--border);border-radius:10px;padding:3px;margin-bottom:14px}
+.epic-subtab{flex:1;text-align:center;padding:9px 4px;font-size:.82rem;font-weight:600;border-radius:8px;cursor:pointer;color:var(--sub);transition:all .2s}
+.epic-subtab.active{background:var(--card);color:var(--primary);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+
+/* ── MENU SEMAINE ── */
+.menu-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;background:var(--card);border-radius:12px;padding:10px 14px;box-shadow:var(--shadow)}
+.menu-nav-btn{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:5px 12px;font-size:.9rem;cursor:pointer;color:var(--sub)}
+.menu-nav-btn:hover{border-color:var(--primary);color:var(--primary)}
+.menu-period-lbl{font-size:.82rem;color:var(--sub);font-weight:600}
+.menu-day-card{background:var(--card);border-radius:var(--radius);margin-bottom:10px;box-shadow:var(--shadow);overflow:hidden}
+.menu-day-hdr{padding:10px 14px;font-weight:700;font-size:.9rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.menu-day-hdr.today-menu{background:var(--primary);color:#fff}
+.menu-day-date{font-size:.78rem;font-weight:400;color:var(--sub)}
+.menu-day-hdr.today-menu .menu-day-date{color:rgba(255,255,255,.75)}
+.menu-meals{padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.menu-meal-row{display:flex;align-items:center;gap:8px}
+.menu-meal-lbl{font-size:.73rem;font-weight:700;color:var(--sub);width:72px;flex-shrink:0;text-transform:uppercase;letter-spacing:.04em}
+.menu-meal-input{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:.85rem;background:var(--bg);color:var(--text);outline:none;font-family:inherit}
+.menu-meal-input:focus{border-color:var(--primary)}
+
 /* ── CONFIG ── */
 .config-intro{background:var(--card);border-radius:var(--radius);padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
 .config-intro p{font-size:.82rem;color:var(--sub);line-height:1.5}
@@ -211,9 +232,10 @@ header{background:var(--primary);color:#fff;padding:calc(14px + var(--safe-top))
 .bulk-btns{display:flex;gap:6px}
 .bulk-btn{border:1.5px solid var(--border);background:var(--bg);color:var(--sub);border-radius:6px;padding:4px 9px;font-size:.72rem;font-weight:600;cursor:pointer}
 .bulk-btn:hover{border-color:var(--primary);color:var(--primary)}
-.config-task-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border)}
+.config-task-row{display:flex;flex-direction:column;align-items:flex-start;padding:11px 14px;border-bottom:1px solid var(--border)}
 .config-task-row:last-child{border-bottom:none}
 .config-task-row.custom-row{background:rgba(108,99,255,.03)}
+.config-task-row-main{display:flex;align-items:center;gap:10px;width:100%}
 .toggle{width:40px;height:22px;border-radius:999px;background:var(--border);position:relative;flex-shrink:0;transition:background .25s;cursor:pointer}
 .toggle.on{background:var(--primary)}
 .toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .25s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
@@ -226,6 +248,12 @@ header{background:var(--primary);color:#fff;padding:calc(14px + var(--safe-top))
 .pp-btn.sel-soir{border-color:var(--soir-b);background:var(--soir);color:var(--soir-b)}
 .delete-btn{background:none;border:none;color:#ccc;font-size:.95rem;cursor:pointer;padding:4px;line-height:1;flex-shrink:0}
 .delete-btn:hover{color:#ff6b6b}
+.freq-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding-left:50px;margin-top:6px}
+.freq-btn{border:1.5px solid var(--border);background:var(--bg);color:var(--sub);border-radius:6px;padding:3px 8px;font-size:.7rem;font-weight:700;cursor:pointer;transition:all .15s}
+.freq-btn.sel{border-color:var(--primary);background:var(--primary);color:#fff}
+.day-toggle-row{display:flex;gap:3px;padding-left:50px;flex-wrap:wrap;margin-top:2px}
+.day-tog{width:26px;height:26px;border-radius:6px;border:1.5px solid var(--border);background:var(--bg);color:var(--sub);font-size:.68rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.day-tog.on{border-color:var(--primary);background:var(--primary);color:#fff}
 .add-custom{padding:12px 14px;border-top:1px solid var(--border)}
 .add-custom-title{font-size:.78rem;font-weight:700;color:var(--sub);margin-bottom:8px}
 .add-row{display:flex;gap:6px}
@@ -300,18 +328,37 @@ header{background:var(--primary);color:#fff;padding:calc(14px + var(--safe-top))
 
 <!-- ══ ÉPICERIE ══ -->
 <div class="panel" id="panel-epic">
-  <div class="epic-add-card">
-    <div class="epic-add-row">
-      <input class="epic-input" id="epicInput" placeholder="Ajouter un article…" maxlength="80"/>
-      <button class="epic-add-btn" id="epicAddBtn">+</button>
+  <div class="epic-subtabs">
+    <div class="epic-subtab active" id="stab-liste" onclick="setEpicMode('liste')">🛒 Liste d'épicerie</div>
+    <div class="epic-subtab" id="stab-menu" onclick="setEpicMode('menu')">🍽️ Menu de la semaine</div>
+  </div>
+
+  <!-- Section liste -->
+  <div id="epicListeSection">
+    <div class="epic-add-card">
+      <div class="epic-add-row">
+        <input class="epic-input" id="epicInput" placeholder="Ajouter un article…" maxlength="80"/>
+        <button class="epic-add-btn" id="epicAddBtn">+</button>
+      </div>
+      <div class="epic-cat-row" id="epicCatRow"></div>
     </div>
-    <div class="epic-cat-row" id="epicCatRow"></div>
+    <div class="epic-toolbar">
+      <div class="epic-count" id="epicCount"></div>
+      <button class="epic-clear-btn" onclick="epicClearChecked()">✕ Effacer les cochés</button>
+    </div>
+    <div id="epicList"></div>
   </div>
-  <div class="epic-toolbar">
-    <div class="epic-count" id="epicCount"></div>
-    <button class="epic-clear-btn" onclick="epicClearChecked()">✕ Effacer les cochés</button>
+
+  <!-- Section menu semaine -->
+  <div id="epicMenuSection" style="display:none">
+    <div class="menu-nav">
+      <button class="menu-nav-btn" onclick="menuNavWeek(-1)">‹</button>
+      <div class="menu-period-lbl" id="menuPeriodLbl"></div>
+      <button class="menu-nav-btn" onclick="menuNavWeek(1)">›</button>
+    </div>
+    <div id="menuGrid"></div>
   </div>
-  <div id="epicList"></div>
+
   <div class="spacer"></div>
 </div>
 
@@ -353,6 +400,18 @@ header{background:var(--primary);color:#fff;padding:calc(14px + var(--safe-top))
       <div class="bulk-btns"><button class="bulk-btn" onclick="bulkToggle('routine',true)">Tout ✓</button><button class="bulk-btn" onclick="bulkToggle('routine',false)">Tout ✗</button></div>
     </div>
     <div id="list-routine"></div>
+  </div>
+  <h3 style="font-size:.82rem;font-weight:700;color:var(--sub);margin:8px 0 8px 4px;text-transform:uppercase;letter-spacing:.06em">🐾 Soins des animaux</h3>
+  <div class="config-section">
+    <div class="config-section-hdr">
+      <div class="config-section-title" style="color:#795548">🐾 Animaux</div>
+      <div class="bulk-btns">
+        <button class="bulk-btn" onclick="bulkToggle('animaux',true)">Tout ✓</button>
+        <button class="bulk-btn" onclick="bulkToggle('animaux',false)">Tout ✗</button>
+      </div>
+    </div>
+    <div id="list-animaux"></div>
+    <div class="add-custom" id="addForm-animaux"></div>
   </div>
   <div class="spacer"></div>
 </div>
@@ -399,12 +458,30 @@ const DEFAULT_TASKS = {
     {id:'rdv_med',   emoji:'🏥', name:'Rendez-vous médical', freq:'Mensuel', defPeriod:'aprem'},
     {id:'budget',    emoji:'💰', name:'Vérification budget', freq:'Mensuel', defPeriod:'aprem'},
     {id:'appel_fam', emoji:'📞', name:'Appel famille/amis',  freq:'Hebdo',   defPeriod:'soir'},
+  ],
+  animaux:[
+    {id:'ani_nourr_m', emoji:'🍽️', name:'Nourriture — matin',      defPeriod:'matin'},
+    {id:'ani_nourr_s', emoji:'🍽️', name:'Nourriture — soir',       defPeriod:'soir'},
+    {id:'ani_eau',     emoji:'💧', name:'Eau fraîche',              defPeriod:'matin'},
+    {id:'ani_litiere', emoji:'🪣', name:'Litière / Cage / Enclos',  defPeriod:'matin'},
+    {id:'ani_prom',    emoji:'🦮', name:'Promenade',                defPeriod:'aprem'},
+    {id:'ani_prom2',   emoji:'🐕', name:'Promenade du soir',        defPeriod:'soir'},
+    {id:'ani_jeux',    emoji:'🎾', name:'Jeux / Exercice',          defPeriod:'aprem'},
+    {id:'ani_bain',    emoji:'🛁', name:'Bain / Toilettage',        defPeriod:'aprem'},
+    {id:'ani_medic',   emoji:'💊', name:'Médicaments animal',       defPeriod:'matin'},
+    {id:'ani_dentes',  emoji:'🦷', name:'Brossage des dents',       defPeriod:'soir'},
+    {id:'ani_griffes', emoji:'✂️', name:'Coupe des griffes',        defPeriod:'aprem'},
+    {id:'ani_vet',     emoji:'🏥', name:'Vétérinaire',              defPeriod:'aprem'},
+    {id:'ani_cage',    emoji:'🏠', name:'Nettoyage cage/chenil',    defPeriod:'matin'},
+    {id:'ani_birds',   emoji:'🐦', name:'Soins oiseaux',            defPeriod:'matin'},
+    {id:'ani_pois',    emoji:'🐟', name:'Soins aquarium/poissons',  defPeriod:'matin'},
   ]
 };
 
 const PERIOD_LABELS = {matin:'🌅', aprem:'☀️', soir:'🌙'};
 const PERIOD_NAMES  = {matin:'Matin', aprem:'Après-midi', soir:'Soir'};
 const JOURS_FR = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+const JOURS_COURT = ['D','L','M','M','J','V','S'];
 const MOIS_FR  = ['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];
 
 const EPIC_CATS = [
@@ -426,19 +503,23 @@ const ST = Object.assign({
   activeTasks: {},   // taskId -> 'matin'|'aprem'|'soir'
   completions: {},   // 'YYYY-MM-DD' -> {taskId:bool}
   notes: {},         // 'YYYY-MM-DD' -> {taskId:'texte'}
-  customTasks: {matin:[], aprem:[], soir:[]},
+  customTasks: {matin:[], aprem:[], soir:[], animaux:[]},
   weekDays: 7,
   weekOffset: 0,     // décalage en jours depuis lundi de la semaine courante
   dark: false,
   epicItems: [],     // [{id, name, cat, checked}]
   epicCat: 'fruits', // catégorie sélectionnée pour ajout
-  taskOrder: {},     // {matin:[...ids], aprem:[...ids], soir:[...ids]}
+  epicMode: 'liste', // 'liste' | 'menu'
+  taskOrder: {},     // {matin:[...ids], aprem:[...ids], soir:[...ids], animaux:[...ids]}
   medLogs: {},       // 'YYYY-MM-DD' -> [{id,time,name,dose,pain}]
   medFormOpen: false,
   medPainSel: null,
+  taskFreq: {},      // {taskId: {type:'daily'|'weekdays'|'weekend'|'custom', days:[0..6]}}
+  menus: {},         // 'YYYY-MM-DD' -> {dej:'', din:'', soup:''}
+  menuWeekOffset: 0, // décalage en semaines pour le menu
 }, loadSt());
 
-['matin','aprem','soir'].forEach(s=>{ if(!ST.customTasks[s]) ST.customTasks[s]=[]; });
+['matin','aprem','soir','animaux'].forEach(s=>{ if(!ST.customTasks[s]) ST.customTasks[s]=[]; });
 if(!ST.completions) ST.completions={};
 if(!ST.notes) ST.notes={};
 if(!ST.activeTasks) ST.activeTasks={};
@@ -446,6 +527,10 @@ if(!ST.epicItems) ST.epicItems=[];
 if(!ST.epicCat) ST.epicCat='fruits';
 if(!ST.taskOrder) ST.taskOrder={};
 if(!ST.medLogs) ST.medLogs={};
+if(!ST.taskFreq) ST.taskFreq={};
+if(!ST.menus) ST.menus={};
+if(!ST.menuWeekOffset) ST.menuWeekOffset=0;
+if(!ST.epicMode) ST.epicMode='liste';
 
 // ═══════════════════════════════════════════
 // DATE UTILS
@@ -481,6 +566,64 @@ function shiftDay(key,n){
 }
 
 // ═══════════════════════════════════════════
+// FRÉQUENCE
+// ═══════════════════════════════════════════
+function taskMatchesDay(taskId, dateKey){
+  const freq = ST.taskFreq && ST.taskFreq[taskId];
+  if (!freq || freq.type === 'daily') return true;
+  const dow = dateFromKey(dateKey).getDay();
+  if (freq.type === 'weekdays') return dow >= 1 && dow <= 5;
+  if (freq.type === 'weekend') return dow === 0 || dow === 6;
+  if (freq.type === 'custom') return (freq.days || []).includes(dow);
+  return true;
+}
+
+function setFreq(taskId, type){
+  if(!ST.taskFreq) ST.taskFreq = {};
+  let days = [];
+  if(type === 'weekdays') days = [1,2,3,4,5];
+  else if(type === 'weekend') days = [0,6];
+  else if(type === 'daily') days = [0,1,2,3,4,5,6];
+  ST.taskFreq[taskId] = {type, days};
+  saveSt();
+}
+
+function toggleFreqDay(taskId, dow){
+  if(!ST.taskFreq) ST.taskFreq = {};
+  if(!ST.taskFreq[taskId]) ST.taskFreq[taskId] = {type:'custom', days:[]};
+  const days = ST.taskFreq[taskId].days || [];
+  const idx = days.indexOf(dow);
+  if(idx === -1) days.push(dow);
+  else days.splice(idx, 1);
+  ST.taskFreq[taskId].days = days;
+  saveSt();
+}
+
+function renderFreqPicker(taskId){
+  const freq = ST.taskFreq && ST.taskFreq[taskId];
+  const type = freq ? freq.type : 'daily';
+  const days = freq ? (freq.days || []) : [];
+
+  let html = '<div class="freq-row">';
+  html += '<button class="freq-btn ' + (type==='daily'?'sel':'') + '" onclick="setFreq(\'' + taskId + '\',\'daily\');renderConfig()">Quotidien</button>';
+  html += '<button class="freq-btn ' + (type==='weekdays'?'sel':'') + '" onclick="setFreq(\'' + taskId + '\',\'weekdays\');renderConfig()">Sem.</button>';
+  html += '<button class="freq-btn ' + (type==='weekend'?'sel':'') + '" onclick="setFreq(\'' + taskId + '\',\'weekend\');renderConfig()">W-E</button>';
+  html += '<button class="freq-btn ' + (type==='custom'?'sel':'') + '" onclick="setFreq(\'' + taskId + '\',\'custom\');renderConfig()">Perso</button>';
+  html += '</div>';
+
+  if(type === 'custom'){
+    html += '<div class="day-toggle-row">';
+    for(let i=0; i<7; i++){
+      const isOn = days.includes(i);
+      html += '<button class="day-tog ' + (isOn?'on':'') + '" onclick="toggleFreqDay(\'' + taskId + '\',' + i + ');renderConfig()" title="' + JOURS_FR[i] + '">' + JOURS_COURT[i] + '</button>';
+    }
+    html += '</div>';
+  }
+
+  return html;
+}
+
+// ═══════════════════════════════════════════
 // TÂCHES HELPERS
 // ═══════════════════════════════════════════
 function getAllTasks(section){
@@ -488,7 +631,7 @@ function getAllTasks(section){
 }
 function getActiveByPeriod(){
   const r={matin:[],aprem:[],soir:[]};
-  ['matin','aprem','soir'].forEach(s=>{
+  ['matin','aprem','soir','animaux'].forEach(s=>{
     getAllTasks(s).forEach(t=>{ const p=ST.activeTasks[t.id]; if(p) r[p].push(t); });
   });
   DEFAULT_TASKS.routine.forEach(t=>{ const p=ST.activeTasks[t.id]; if(p) r[p].push(t); });
@@ -518,7 +661,7 @@ function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 function renderToday(){
   document.getElementById('hdrDate').textContent = formatLong(ST.activeDay);
   const byP=getActiveByPeriod();
-  const all=[...byP.matin,...byP.aprem,...byP.soir];
+  const all=[...byP.matin,...byP.aprem,...byP.soir].filter(t=>taskMatchesDay(t.id, ST.activeDay));
   const comp=ST.completions[ST.activeDay]||{};
   const done=all.filter(t=>comp[t.id]).length;
   const pct=all.length?Math.round(done/all.length*100):0;
@@ -538,7 +681,7 @@ function renderToday(){
   ];
   let html='';
   sections.forEach(({key,label,cls})=>{
-    const tasks=byP[key]; if(!tasks.length) return;
+    const tasks=byP[key].filter(t=>taskMatchesDay(t.id, ST.activeDay)); if(!tasks.length) return;
     const dc=tasks.filter(t=>comp[t.id]).length;
     html+=`<div class="section-hdr ${cls}">${label}<span class="section-count">${dc}/${tasks.length}</span></div>`;
     tasks.forEach((t,idx)=>{
@@ -666,7 +809,6 @@ function toggleMedForm(){
 }
 function setPain(val){
   ST.medPainSel=val; saveSt(); renderToday();
-  // Ré-ouvrir le formulaire
   ST.medFormOpen=true;
 }
 function addMedEntry(){
@@ -779,9 +921,10 @@ function renderWeek(){
     const d=new Date(start); d.setDate(d.getDate()+i);
     const key=keyFromDate(d);
     const comp=ST.completions[key]||{};
-    const done=all.filter(t=>comp[t.id]).length;
+    const filteredAll=all.filter(t=>taskMatchesDay(t.id, key));
+    const done=filteredAll.filter(t=>comp[t.id]).length;
     const isToday=key===today;
-    const pct=all.length?Math.round(done/all.length*100):0;
+    const pct=filteredAll.length?Math.round(done/filteredAll.length*100):0;
     const dayName=JOURS_FR[d.getDay()];
     const dateLabel=d.getDate()+' '+MOIS_FR[d.getMonth()];
     const isOpen=isToday; // aujourd'hui ouvert par défaut
@@ -793,13 +936,13 @@ function renderWeek(){
           <div class="week-day-date">${dateLabel}</div>
         </div>
         <div class="week-day-right">
-          <div class="week-day-prog">${pct}% · ${done}/${all.length}</div>
+          <div class="week-day-prog">${pct}% · ${done}/${filteredAll.length}</div>
           <div class="week-chevron" id="wchev-${key}">${isOpen?'▾':'▸'}</div>
         </div>
       </div>
       <div class="week-tasks ${isOpen?'open':''}" id="wd-${key}">`;
 
-    if(!all.length){
+    if(!filteredAll.length){
       html+=`<div class="week-no-tasks">Aucune tâche configurée</div>`;
     } else {
       const sections=[
@@ -808,7 +951,7 @@ function renderWeek(){
         {key:'soir', label:'🌙 Soir'},
       ];
       sections.forEach(s=>{
-        const tasks=byP[s.key]; if(!tasks.length) return;
+        const tasks=byP[s.key].filter(t=>taskMatchesDay(t.id, key)); if(!tasks.length) return;
         html+=`<div class="week-section-lbl">${s.label}</div>`;
         tasks.forEach(t=>{
           const isDone=!!comp[t.id];
@@ -852,7 +995,21 @@ function renderEpicCats(){
 }
 function setEpicCat(id){ ST.epicCat=id; saveSt(); renderEpicCats(); }
 
+function setEpicMode(mode){
+  ST.epicMode=mode; saveSt(); renderEpic();
+}
+
 function renderEpic(){
+  const mode=ST.epicMode||'liste';
+  // Sous-onglets
+  document.getElementById('stab-liste').classList.toggle('active',mode==='liste');
+  document.getElementById('stab-menu').classList.toggle('active',mode==='menu');
+  document.getElementById('epicListeSection').style.display=mode==='liste'?'':'none';
+  document.getElementById('epicMenuSection').style.display=mode==='menu'?'':'none';
+
+  if(mode==='menu'){ renderMenu(); return; }
+
+  // ── Mode liste ──
   renderEpicCats();
   const items=ST.epicItems||[];
   const total=items.length;
@@ -887,6 +1044,61 @@ function renderEpic(){
   document.getElementById('epicList').innerHTML=html;
 }
 
+// ── Menu de la semaine ──
+function renderMenu(){
+  const offset=ST.menuWeekOffset||0;
+  const mon=mondayOfWeek(todayKey());
+  mon.setDate(mon.getDate()+offset*7);
+  const end=new Date(mon); end.setDate(end.getDate()+6);
+  const fmt=d=>d.getDate()+' '+MOIS_FR[d.getMonth()];
+  document.getElementById('menuPeriodLbl').textContent=fmt(mon)+' – '+fmt(end);
+
+  const today=todayKey();
+  let html='';
+  for(let i=0;i<7;i++){
+    const d=new Date(mon); d.setDate(d.getDate()+i);
+    const key=keyFromDate(d);
+    const dayName=JOURS_FR[d.getDay()];
+    const dateLabel=d.getDate()+' '+MOIS_FR[d.getMonth()];
+    const isToday=key===today;
+    const m=(ST.menus||{})[key]||{};
+    html+=`<div class="menu-day-card">
+      <div class="menu-day-hdr ${isToday?'today-menu':''}">
+        <span>${dayName}</span>
+        <span class="menu-day-date">${dateLabel}</span>
+      </div>
+      <div class="menu-meals">
+        <div class="menu-meal-row">
+          <div class="menu-meal-lbl">🌅 Déj.</div>
+          <input class="menu-meal-input" placeholder="Déjeuner…" value="${esc(m.dej||'')}" onchange="saveMenu('${key}','dej',this.value)" onblur="saveMenu('${key}','dej',this.value)"/>
+        </div>
+        <div class="menu-meal-row">
+          <div class="menu-meal-lbl">☀️ Dîner</div>
+          <input class="menu-meal-input" placeholder="Dîner…" value="${esc(m.din||'')}" onchange="saveMenu('${key}','din',this.value)" onblur="saveMenu('${key}','din',this.value)"/>
+        </div>
+        <div class="menu-meal-row">
+          <div class="menu-meal-lbl">🌙 Souper</div>
+          <input class="menu-meal-input" placeholder="Souper…" value="${esc(m.soup||'')}" onchange="saveMenu('${key}','soup',this.value)" onblur="saveMenu('${key}','soup',this.value)"/>
+        </div>
+      </div>
+    </div>`;
+  }
+  document.getElementById('menuGrid').innerHTML=html;
+}
+
+function saveMenu(dateKey,meal,val){
+  if(!ST.menus) ST.menus={};
+  if(!ST.menus[dateKey]) ST.menus[dateKey]={};
+  ST.menus[dateKey][meal]=val.trim();
+  saveSt();
+}
+
+function menuNavWeek(dir){
+  if(!ST.menuWeekOffset) ST.menuWeekOffset=0;
+  ST.menuWeekOffset+=dir;
+  saveSt(); renderMenu();
+}
+
 function epicAdd(){
   const inp=document.getElementById('epicInput');
   const name=inp.value.trim(); if(!name) return;
@@ -912,7 +1124,7 @@ function epicClearChecked(){
 function renderConfig(){
   const total=Object.values(ST.activeTasks).filter(v=>!!v).length;
   document.getElementById('configCounter').textContent=`· ${total} activée${total!==1?'s':''}`;
-  ['matin','aprem','soir'].forEach(renderConfigSection);
+  ['matin','aprem','soir','animaux'].forEach(renderConfigSection);
   renderRoutines();
 }
 function renderConfigSection(section){
@@ -923,10 +1135,13 @@ function renderConfigSection(section){
     const isOn=!!period;
     const isCustom=!(DEFAULT_TASKS[section]||[]).find(d=>d.id===t.id);
     html+=`<div class="config-task-row ${isCustom?'custom-row':''}">
-      <div class="toggle ${isOn?'on':''}" onclick="toggleTask('${t.id}','${t.defPeriod||section}')"></div>
-      <div class="config-task-name" onclick="toggleTask('${t.id}','${t.defPeriod||section}')">${t.emoji} ${esc(t.name)}</div>
-      ${isOn?renderPeriodPicker(t.id,period):'<div style="width:96px"></div>'}
-      ${isCustom?`<button class="delete-btn" onclick="delCustom(event,'${section}','${t.id}')">🗑</button>`:''}
+      <div class="config-task-row-main">
+        <div class="toggle ${isOn?'on':''}" onclick="toggleTask('${t.id}','${t.defPeriod||section}')"></div>
+        <div class="config-task-name" onclick="toggleTask('${t.id}','${t.defPeriod||section}')">${t.emoji} ${esc(t.name)}</div>
+        ${isOn?renderPeriodPicker(t.id,period):'<div style="width:96px"></div>'}
+        ${isCustom?`<button class="delete-btn" onclick="delCustom(event,'${section}','${t.id}')">🗑</button>`:''}
+      </div>
+      ${isOn?renderFreqPicker(t.id):''}
     </div>`;
   });
   document.getElementById('list-'+section).innerHTML=html;
@@ -942,11 +1157,14 @@ function renderRoutines(){
   DEFAULT_TASKS.routine.forEach(t=>{
     const period=ST.activeTasks[t.id];
     const isOn=!!period;
-    html+=`<div class="routine-row">
-      <div class="toggle ${isOn?'on':''}" onclick="toggleTask('${t.id}','${t.defPeriod}')"></div>
-      <div class="config-task-name" onclick="toggleTask('${t.id}','${t.defPeriod}')" style="cursor:pointer">${t.emoji} ${esc(t.name)}</div>
-      ${isOn?renderPeriodPicker(t.id,period):'<div style="width:96px"></div>'}
-      <div class="routine-freq">${t.freq}</div>
+    html+=`<div class="config-task-row">
+      <div class="config-task-row-main">
+        <div class="toggle ${isOn?'on':''}" onclick="toggleTask('${t.id}','${t.defPeriod}')"></div>
+        <div class="config-task-name" onclick="toggleTask('${t.id}','${t.defPeriod}')" style="cursor:pointer">${t.emoji} ${esc(t.name)}</div>
+        ${isOn?renderPeriodPicker(t.id,period):'<div style="width:96px"></div>'}
+        <div class="routine-freq">${t.freq}</div>
+      </div>
+      ${isOn?renderFreqPicker(t.id):''}
     </div>`;
   });
   document.getElementById('list-routine').innerHTML=html;
