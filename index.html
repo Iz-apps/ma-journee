@@ -1,25 +1,24 @@
 <!DOCTYPE html>
-<html lang='fr'>
+<html lang="fr">
 <head>
-  <meta charset='UTF-8'>
-  <meta name='viewport' content='width=device-width, initial-scale=1.0, viewport-fit=cover'>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Ma Journée - Planificateur quotidien personnel">
+  <meta name="theme-color" content="#6c63ff">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <title>Ma Journée ✨</title>
-  <link rel='manifest' href='manifest.json'>
-  <link rel='icon' href='icon-192.png'>
-  <meta name='theme-color' content='#6c63ff'>
-  <meta name='apple-mobile-web-app-capable' content='yes'>
-  <meta name='apple-mobile-web-app-status-bar-style' content='black-translucent'>
-  <meta name='apple-mobile-web-app-title' content='Ma Journée'>
   <style>
     :root {
       --bg: #ffffff;
       --card: #f8f9fa;
       --text: #1a1a1a;
-      --sub: #666666;
+      --sub: #666;
       --primary: #6c63ff;
       --border: #e0e0e0;
       --radius: 16px;
-      --shadow: 0 2px 8px rgba(0,0,0,0.1);
       --matin: #f59e0b;
       --aprem: #10b981;
       --soir: #8b5cf6;
@@ -27,1237 +26,1747 @@
     body.dark {
       --bg: #1a1a1a;
       --card: #2a2a2a;
-      --text: #ffffff;
-      --sub: #aaaaaa;
-      --border: #444444;
-      --shadow: 0 2px 8px rgba(0,0,0,0.3);
+      --text: #fff;
+      --sub: #aaa;
+      --border: #444;
     }
     * { box-sizing: border-box; }
     body {
-      margin: 0; padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
       transition: background 0.3s, color 0.3s;
     }
-    html { padding: max(0px, env(safe-area-inset-top)) max(0px, env(safe-area-inset-right)) max(0px, env(safe-area-inset-bottom)) max(0px, env(safe-area-inset-left)); }
-    .app { display: flex; flex-direction: column; height: 100vh; }
+    #root {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
     .header {
-      padding: 16px; background: var(--card);
+      background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+      color: white;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+    button {
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 8px;
+      padding: 8px 16px;
+      background: var(--card);
+      color: var(--text);
+      transition: all 0.2s;
+    }
+    button:active { transform: scale(0.98); }
+    button.icon {
+      width: 40px;
+      padding: 8px;
+      font-size: 18px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border-radius: 50%;
+    }
+    button.icon:hover { background: rgba(255,255,255,0.3); }
+    button.primary {
+      background: var(--primary);
+      color: white;
+    }
+    button.primary:hover { background: #5a52cc; }
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      background: var(--card);
+      overflow-x: auto;
       border-bottom: 1px solid var(--border);
-      display: flex; justify-content: space-between; align-items: center;
-      flex-wrap: wrap; gap: 8px;
     }
-    .header-title { font-size: 20px; font-weight: 600; }
-    .header-right { display: flex; gap: 8px; align-items: center; }
-    .btn {
-      padding: 8px 12px; border: none; border-radius: var(--radius);
-      background: var(--primary); color: white; cursor: pointer;
-      font-size: 14px; transition: opacity 0.2s;
+    .nav-tab {
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--sub);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s;
     }
-    .btn:hover { opacity: 0.9; }
-    .btn.secondary { background: var(--card); color: var(--text); border: 1px solid var(--border); }
-    .btn-icon { padding: 8px; font-size: 16px; background: none; border: none; cursor: pointer; color: var(--text); }
-    .btn-icon:hover { opacity: 0.7; }
-    .tabs {
-      display: flex; border-bottom: 1px solid var(--border);
-      overflow-x: auto; padding: 0 8px;
+    .nav-tab.active {
+      background: var(--primary);
+      color: white;
     }
-    .tab-btn {
-      padding: 12px 16px; border: none; background: transparent; cursor: pointer;
-      color: var(--sub); font-size: 14px; white-space: nowrap;
-      border-bottom: 3px solid transparent; transition: all 0.2s;
-    }
-    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
-    .tab-btn:hover { color: var(--text); }
     .content {
-      flex: 1; overflow-y: auto; padding: 16px;
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
     }
-    .day-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .day-nav button { background: none; border: none; font-size: 24px; cursor: pointer; }
-    .progress-bar {
-      width: 100%; height: 8px; background: var(--border); border-radius: 4px;
-      overflow: hidden; margin-bottom: 16px;
-    }
-    .progress-fill { height: 100%; background: var(--primary); transition: width 0.3s; }
-    .section {
-      margin-bottom: 20px;
-    }
-    .section-header {
-      padding: 8px 12px; border-radius: var(--radius);
-      font-weight: 600; font-size: 14px; color: white; margin-bottom: 8px;
-    }
-    .section-header.matin { background: var(--matin); }
-    .section-header.aprem { background: var(--aprem); }
-    .section-header.soir { background: var(--soir); }
-    .task-card {
-      background: var(--card); padding: 12px; border-radius: var(--radius);
-      margin-bottom: 8px; border: 1px solid var(--border);
-      display: flex; align-items: center; gap: 12px;
-    }
-    .task-card.done { opacity: 0.6; }
-    .task-card.done .task-name { text-decoration: line-through; }
-    .task-reorder { display: flex; flex-direction: column; gap: 4px; }
-    .reorder-btn { background: none; border: none; cursor: pointer; font-size: 12px; padding: 2px 4px; color: var(--sub); }
-    .checkbox-circle {
-      width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border);
-      background: none; cursor: pointer; transition: all 0.2s;
-    }
-    .checkbox-circle.checked { background: var(--primary); border-color: var(--primary); }
-    .checkbox-circle:hover { border-color: var(--primary); }
-    .task-content { flex: 1; }
-    .task-name { font-weight: 500; }
-    .task-note { font-size: 12px; color: var(--sub); margin-top: 4px; }
-    .task-actions { display: flex; gap: 8px; }
-    .note-btn { background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px; color: var(--sub); }
-    .note-btn:hover { color: var(--primary); }
-    .note-area {
-      background: var(--bg); padding: 8px; border-radius: 8px; border: 1px solid var(--border);
-      margin-top: 8px; width: 100%;
-    }
-    .note-textarea {
-      width: 100%; min-height: 60px; border: none; background: none; color: var(--text);
-      font-family: inherit; resize: vertical;
-    }
-    .note-textarea::placeholder { color: var(--sub); }
-    .note-buttons { display: flex; gap: 8px; margin-top: 8px; }
-    .note-buttons button { padding: 6px 12px; font-size: 12px; }
-    .card { background: var(--card); padding: 16px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 16px; }
-    .card-title { font-weight: 600; margin-bottom: 12px; }
-    .input-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-    .input-row input, .input-row select {
-      flex: 1; min-width: 100px; padding: 8px; border: 1px solid var(--border);
-      border-radius: 8px; background: var(--bg); color: var(--text); font-size: 14px;
-    }
-    .med-entry {
-      background: var(--bg); padding: 8px 12px; border-radius: 8px;
-      margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
-    }
-    .med-time { background: var(--primary); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
-    .med-pain { font-weight: 600; }
-    .med-pain.pain-0, .med-pain.pain-1, .med-pain.pain-2, .med-pain.pain-3 { color: #10b981; }
-    .med-pain.pain-4, .med-pain.pain-5, .med-pain.pain-6 { color: #f59e0b; }
-    .med-pain.pain-7, .med-pain.pain-8, .med-pain.pain-9, .med-pain.pain-10 { color: #ef4444; }
-    .day-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; }
-    .day-card-header {
-      padding: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
-      user-select: none;
-    }
-    .day-card-header:hover { background: var(--border); }
-    .day-progress { font-size: 12px; color: var(--sub); }
-    .day-card-content { padding: 12px; border-top: 1px solid var(--border); display: none; }
-    .day-card-content.open { display: block; }
-    .week-selector { display: flex; gap: 8px; margin-bottom: 16px; justify-content: center; }
-    .week-btn { padding: 8px 12px; border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 8px; cursor: pointer; font-size: 12px; }
-    .week-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-    .epic-tabs { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
-    .epic-tab { padding: 12px; border: none; background: transparent; cursor: pointer; color: var(--sub); border-bottom: 2px solid transparent; }
-    .epic-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-    .epic-cat-select { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
-    .epic-cat-btn { padding: 6px 12px; border: 1px solid var(--border); background: var(--card); border-radius: 8px; cursor: pointer; font-size: 12px; }
-    .epic-cat-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-    .epic-item { background: var(--bg); padding: 8px 12px; border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-    .epic-item input { margin: 0; }
-    .epic-item .item-name { flex: 1; }
-    .epic-item .item-cat { font-size: 12px; color: var(--sub); }
-    .meal-input { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
-    .meal-icon { font-size: 16px; min-width: 20px; }
-    .meal-input input { flex: 1; padding: 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); }
-    .sante-sub-tabs { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
-    .sante-sub-tab { padding: 12px; border: none; background: transparent; cursor: pointer; color: var(--sub); border-bottom: 2px solid transparent; font-size: 14px; }
-    .sante-sub-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-    .sante-form-row { margin-bottom: 12px; }
-    .sante-form-row label { display: block; font-size: 12px; color: var(--sub); margin-bottom: 4px; font-weight: 500; }
-    .sante-form-row input { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 14px; }
-    .sante-cal-grid {
-      display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 16px;
-    }
-    .sante-cal-cell {
-      aspect-ratio: 1; padding: 4px; border-radius: 8px; border: 1px solid var(--border);
-      background: var(--bg); text-align: center; font-size: 12px; cursor: pointer;
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
-    }
-    .sante-cal-cell:hover { background: var(--card); }
-    .sante-cal-cell.today { border: 2px solid var(--primary); }
-    .cal-dots { display:flex; justify-content:center; gap:2px; margin-top:1px; }
-    .cal-dot  { width:6px; height:6px; border-radius:50%; display:inline-block; }
-    .cal-dot.blue   { background:var(--primary); }
-    .cal-dot.purple { background:#e879f9; }
-    .cal-dot.red    { background:#ef4444; }
-    .humeur-picker { display:flex; gap:6px; margin-top:4px; }
-    .humeur-btn { font-size:22px; background:none; border:2px solid transparent; border-radius:50%; padding:4px 6px; cursor:pointer; transition:all 0.2s; }
-    .humeur-btn.active { border-color:var(--primary); background:var(--card); }
-    .sante-notes { width:100%; min-height:60px; border:1px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text); font-family:inherit; padding:8px; font-size:14px; resize:vertical; }
-    .sante-histo {
-      width: 100%; border-collapse: collapse;
-    }
-    .sante-histo th, .sante-histo td { padding: 8px; text-align: left; font-size: 12px; border-bottom: 1px solid var(--border); }
-    .sante-histo th { font-weight: 600; color: var(--sub); }
-    .histo-val { padding: 2px 6px; border-radius: 4px; font-weight: 500; }
-    .histo-val.ok { background: rgba(16,185,129,0.2); color: #10b981; }
-    .histo-val.warn { background: rgba(245,158,11,0.2); color: #f59e0b; }
-    .histo-val.bad { background: rgba(239,68,68,0.2); color: #ef4444; }
-    .histo-val.neu { color: var(--text); }
-    .config-intro { margin-bottom: 16px; line-height: 1.6; }
-    .config-count { font-weight: 600; color: var(--primary); }
-    .config-section { margin-bottom: 20px; }
-    .config-section-title {
-      font-weight: 600; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
-    }
-    .config-toggle-all { padding: 6px 12px; font-size: 12px; }
-    .config-task-row {
-      background: var(--bg); padding: 12px; border-radius: 8px; margin-bottom: 8px;
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
       border: 1px solid var(--border);
     }
-    .config-task-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-    .config-task-header input { margin: 0; }
-    .config-task-name { flex: 1; font-weight: 500; }
-    .config-period-picker { display: flex; gap: 4px; margin-bottom: 8px; }
-    .period-btn { padding: 4px 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 4px; font-size: 11px; cursor: pointer; }
-    .period-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-    .config-freq-picker { display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap; }
-    .freq-btn { padding: 4px 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 4px; font-size: 11px; cursor: pointer; }
-    .freq-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-    .config-day-toggles { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
-    .day-toggle { min-width: 36px; height: 32px; border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; padding: 0 4px; transition: all 0.15s; }
-    .day-toggle:hover { border-color: var(--primary); color: var(--primary); }
-    .day-toggle.active { background: var(--primary); color: white; border-color: var(--primary); }
-    .schedule-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--primary); background: rgba(108,99,255,0.1); border-radius: 6px; padding: 2px 8px; margin-top: 4px; flex-wrap: wrap; }
-    .add-custom-task { display: flex; gap: 8px; margin-top: 12px; }
-    .add-custom-task input { flex: 1; padding: 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); }
-    .add-custom-task button { padding: 8px 12px; }
-    .journal-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 16px; }
-    .journal-header { padding: 12px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 600; user-select: none; background: linear-gradient(135deg,#f59e0b22,#e879f922); border-radius: var(--radius) var(--radius) 0 0; }
-    .journal-header:hover { opacity: 0.85; }
-    .journal-body { padding: 0 16px 16px; border-top: 1px solid var(--border); display: none; }
-    .journal-body.open { display: block; }
-    .journal-row { margin-bottom: 12px; }
-    .journal-row label { display: block; font-size: 12px; color: var(--sub); margin-bottom: 4px; font-weight: 500; }
-    .journal-row input[type=time], .journal-row textarea { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-family: inherit; font-size: 14px; }
-    .journal-row textarea { min-height: 70px; resize: vertical; }
-    .gratitude-entry { background: var(--bg); padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; border-left: 3px solid #f59e0b; font-size: 13px; }
-    .gratitude-entry-date { font-size: 11px; color: var(--sub); margin-bottom: 2px; }
-    .med-value-form { background: var(--card); border: 2px solid var(--primary); border-radius: 12px; padding: 12px 14px; margin: 4px 0 8px 44px; }
-    .med-value-form label { display: block; font-size: 12px; font-weight: 600; color: var(--primary); margin-bottom: 6px; }
-    .med-value-form input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 16px; font-weight: 600; }
-    .med-value-form input:focus { outline: 2px solid var(--primary); }
-    .med-badge { display: inline-block; background: rgba(108,99,255,0.15); color: var(--primary); border-radius: 6px; padding: 1px 6px; font-size: 11px; font-weight: 600; margin-top: 2px; }
+    .card-header {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .progress-bar {
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--matin), var(--aprem), var(--soir));
+      transition: width 0.3s;
+    }
+    .period-label {
+      font-weight: 600;
+      font-size: 14px;
+      margin-top: 12px;
+      margin-bottom: 8px;
+      color: var(--primary);
+    }
+    .task-card {
+      display: flex;
+      gap: 12px;
+      padding: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      align-items: flex-start;
+    }
+    .task-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .task-controls button {
+      width: 28px;
+      padding: 4px;
+      font-size: 12px;
+      background: var(--border);
+    }
+    .task-checkbox {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+      background: transparent;
+      cursor: pointer;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .task-checkbox.checked {
+      background: var(--primary);
+      color: white;
+    }
+    .task-content {
+      flex: 1;
+    }
+    .task-name {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .task-name.done {
+      text-decoration: line-through;
+      color: var(--sub);
+    }
+    .task-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .task-actions button {
+      padding: 4px 8px;
+      font-size: 12px;
+      width: auto;
+      background: var(--border);
+    }
+    .med-badge {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .med-value-form {
+      background: var(--bg);
+      border: 2px solid var(--primary);
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 8px;
+    }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: var(--sub);
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .inline-textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--primary);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      min-height: 80px;
+      resize: vertical;
+    }
+    .date-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .date-nav button {
+      width: 40px;
+      padding: 8px;
+    }
+    .date-display {
+      text-align: center;
+      font-weight: 600;
+      font-size: 16px;
+    }
+    .todo-section {
+      background: linear-gradient(135deg, #fbbf24 0%, #a855f7 100%);
+      color: white;
+      padding: 16px;
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+    }
+    .todo-section .card-header {
+      color: white;
+      margin-bottom: 16px;
+    }
+    .todo-add-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .todo-add-row input {
+      flex: 1;
+      padding: 10px 12px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.9);
+      color: var(--text);
+      font-size: 14px;
+    }
+    .todo-add-row select {
+      padding: 10px 8px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.9);
+      color: var(--text);
+      font-size: 13px;
+    }
+    .todo-add-row button {
+      background: rgba(255,255,255,0.9);
+      color: var(--text);
+      padding: 10px 16px;
+      font-weight: 600;
+    }
+    .todo-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .todo-item {
+      background: rgba(255,255,255,0.95);
+      color: var(--text);
+      padding: 12px;
+      border-radius: 8px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .todo-priority-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .todo-priority-badge.normal { background: #d1d5db; color: #374151; }
+    .todo-priority-badge.urgent { background: #ef4444; color: white; }
+    .todo-priority-badge.important { background: #f97316; color: white; }
+    .todo-item-content {
+      flex: 1;
+    }
+    .todo-item-text {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .todo-item-dates {
+      font-size: 12px;
+      color: var(--sub);
+    }
+    .todo-item-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .todo-item-actions button {
+      width: 32px;
+      height: 32px;
+      padding: 4px;
+      font-size: 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .todo-done-item {
+      opacity: 0.6;
+      text-decoration: line-through;
+    }
+    .journal-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+    .journal-header {
+      font-weight: 600;
+      margin-bottom: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .journal-body {
+      display: none;
+    }
+    .journal-body.open {
+      display: block;
+    }
+    .journal-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .journal-row.full {
+      grid-template-columns: 1fr;
+    }
+    .schedule-badge {
+      display: inline-block;
+      background: rgba(108, 99, 255, 0.1);
+      color: var(--primary);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .cal-day {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border-radius: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .cal-day:hover { background: var(--card); }
+    .cal-dots {
+      display: flex;
+      gap: 3px;
+      justify-content: center;
+      margin-top: 4px;
+    }
+    .cal-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+    .cal-dot.blue { background: var(--primary); }
+    .cal-dot.purple { background: #e879f9; }
+    .cal-dot.red { background: #ef4444; }
+    .histo-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .histo-table th {
+      background: var(--card);
+      padding: 8px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+    }
+    .histo-table td {
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .histo-val {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .histo-val.ok { background: #dcfce7; color: #166534; }
+    .histo-val.warn { background: #fed7aa; color: #92400e; }
+    .histo-val.bad { background: #fecaca; color: #991b1b; }
+    .histo-val.neu { background: var(--border); color: var(--sub); }
+    .humeur-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      background: var(--bg);
+      font-size: 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .humeur-btn.selected {
+      border-color: var(--primary);
+      background: rgba(108, 99, 255, 0.1);
+    }
+    .sante-notes {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: inherit;
+      min-height: 100px;
+      resize: vertical;
+    }
+    .config-section {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+    .config-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    .config-items {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .config-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px;
+      background: var(--bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .config-checkbox {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      cursor: pointer;
+    }
+    .config-details {
+      flex: 1;
+    }
+    .config-name {
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+    .config-controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .config-controls select {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 12px;
+    }
+    .config-days {
+      display: flex;
+      gap: 4px;
+    }
+    .config-day-btn {
+      width: 32px;
+      height: 32px;
+      padding: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--sub);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .config-day-btn.selected {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    .config-day-btn:hover { border-color: var(--primary); }
+    .config-custom-input {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .config-custom-input input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+    }
+    .config-custom-input button {
+      padding: 8px 16px;
+    }
+    .sub-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .sub-tab {
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--sub);
+      cursor: pointer;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    .sub-tab.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    .day-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+    .day-card-header {
+      font-weight: 600;
+      margin-bottom: 10px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .day-card-body {
+      display: none;
+    }
+    .day-card-body.open {
+      display: block;
+    }
+    .meal-row {
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+    .meal-row input {
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+    }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
-  <div class='app'>
-    <div class='header'>
-      <div class='header-title'>Ma Journée ✨</div>
-      <div class='header-right'>
-        <button class='btn-icon' onclick='toggleDarkMode()' title='Dark mode'>🌙</button>
-      </div>
-    </div>
-    <div class='tabs'>
-      <button class='tab-btn active' onclick='switchTab("jour")'>📅 Jour</button>
-      <button class='tab-btn' onclick='switchTab("sem")'>🗓️ Sem.</button>
-      <button class='tab-btn' onclick='switchTab("epic")'>🛒 Épic.</button>
-      <button class='tab-btn' onclick='switchTab("sante")'>📊 Santé</button>
-      <button class='tab-btn' onclick='switchTab("config")'>⚙️ Config</button>
-    </div>
-    <div class='content' id='content'></div>
-  </div>
+  <div id="root"></div>
 
   <script>
     const JOURS_FR = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
     const JOURS_COURT = ['D','L','M','M','J','V','S'];
-    const JOURS_2     = ['Di','Lu','Ma','Me','Je','Ve','Sa'];
-    const JOURS_FULL  = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+    const JOURS_2 = ['Di','Lu','Ma','Me','Je','Ve','Sa'];
+    const JOURS_FULL = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
     const MOIS_FR = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
     const CATEGORIES = {fruits:'🥦 Fruits & Légumes', viande:'🥩 Viandes', fromage:'🧀 Laitiers', epice:'🥫 Épicerie', autre:'🛍️ Autres'};
     const MEALS = {dej:'🌅 Déj.', diner:'☀️ Dîner', souper:'🌙 Souper'};
+    const HUMEURS = ['😞','😕','😐','🙂','😄'];
 
     const MED_TASKS = {
-      rmed_glycemie: {field:'glycemie',   label:'Glycémie',         unit:'mmol/L', step:'0.1', ph:'ex: 5.5'},
-      rmed_tension:  {type:'tension',     label:'Tension artérielle', unit:'mmHg'},
-      rmed_poids:    {field:'poids',      label:'Poids',               unit:'kg',     step:'0.1', ph:'ex: 65.0'},
-      rmed_sato2:    {field:'sato2',      label:'Saturation O₂',   unit:'%',      ph:'ex: 98'},
-      rmed_temp:     {field:'temp',       label:'Température',      unit:'°C',    step:'0.1', ph:'ex: 37.0'},
-      rmed_fc:       {field:'fc',         label:'Fréq. cardiaque',  unit:'bpm',    ph:'ex: 70'},
-      rmed_douleur:  {field:'douleur',    label:'Douleur générale', unit:'/10', max:'10', ph:'0 à 10'},
-      rmed_sommeil:  {field:'sommeil',    label:'Sommeil',              unit:'h',      step:'0.5', ph:'ex: 8'},
+      rmed_glycemie: {field:'glycemie',  label:'Glycémie',           unit:'mmol/L', step:'0.1', ph:'ex: 5.5'},
+      rmed_tension:  {type:'tension',    label:'Tension artérielle',  unit:'mmHg'},
+      rmed_poids:    {field:'poids',     label:'Poids',               unit:'kg',    step:'0.1', ph:'ex: 65.0'},
+      rmed_sato2:    {field:'sato2',     label:'Saturation O₂',       unit:'%',     ph:'ex: 98'},
+      rmed_temp:     {field:'temp',      label:'Température',          unit:'°C',    step:'0.1', ph:'ex: 37.0'},
+      rmed_fc:       {field:'fc',        label:'Fréq. cardiaque',      unit:'bpm',   ph:'ex: 70'},
+      rmed_douleur:  {field:'douleur',   label:'Douleur générale',     unit:'/10',   max:'10',   ph:'0 à 10'},
+      rmed_sommeil:  {field:'sommeil',   label:'Sommeil',              unit:'h',     step:'0.5', ph:'ex: 8'},
+      rmed_humeur:   {field:'humeur',    label:'Humeur du jour',       type:'humeur'},
     };
 
     const DEFAULT_TASKS = {
       matin: [
-        {id:'lever', emoji:'⏰', name:'Heure de lever', defPeriod:'matin'},
-        {id:'eau', emoji:'💧', name:"Verre d'eau au lever", defPeriod:'matin'},
-        {id:'med_m', emoji:'💊', name:'Médicaments — matin', defPeriod:'matin'},
-        {id:'cardio', emoji:'🏃', name:'Cardio', defPeriod:'matin'},
-        {id:'yoga', emoji:'🧘', name:'Yoga / Étirements', defPeriod:'matin'},
-        {id:'dejeuner', emoji:'🍳', name:'Déjeuner', defPeriod:'matin'},
-        {id:'vais_m', emoji:'🫧', name:'Vaisselle du matin', defPeriod:'matin'},
-        {id:'lit', emoji:'🛏️', name:'Faire le lit', defPeriod:'matin'},
+        {id:'lever',    emoji:'⏰', name:'Heure de lever',         defPeriod:'matin'},
+        {id:'eau',      emoji:'💧', name:"Verre d'eau au lever",   defPeriod:'matin'},
+        {id:'med_m',    emoji:'💊', name:'Médicaments — matin',    defPeriod:'matin'},
+        {id:'cardio',   emoji:'🏃', name:'Cardio',                 defPeriod:'matin'},
+        {id:'yoga',     emoji:'🧘', name:'Yoga / Étirements',      defPeriod:'matin'},
+        {id:'dejeuner', emoji:'🍳', name:'Déjeuner',               defPeriod:'matin'},
+        {id:'vais_m',   emoji:'🫧', name:'Vaisselle du matin',     defPeriod:'matin'},
+        {id:'lit',      emoji:'🛏️', name:'Faire le lit',           defPeriod:'matin'},
       ],
       aprem: [
-        {id:'diner', emoji:'🥗', name:'Dîner', defPeriod:'aprem'},
-        {id:'hydrat', emoji:'💧', name:'Hydratation', defPeriod:'aprem'},
-        {id:'muscu', emoji:'💪', name:'Musculation', defPeriod:'aprem'},
-        {id:'marche', emoji:'🚶', name:'Marche / Promenade', defPeriod:'aprem'},
-        {id:'lecture', emoji:'📚', name:'Lecture', defPeriod:'aprem'},
-        {id:'travail', emoji:'💼', name:'Tâches de travail', defPeriod:'aprem'},
+        {id:'diner',    emoji:'🥗', name:'Dîner',                  defPeriod:'aprem'},
+        {id:'hydrat',   emoji:'💧', name:'Hydratation',            defPeriod:'aprem'},
+        {id:'muscu',    emoji:'💪', name:'Musculation',            defPeriod:'aprem'},
+        {id:'marche',   emoji:'🚶', name:'Marche / Promenade',     defPeriod:'aprem'},
+        {id:'lecture',  emoji:'📚', name:'Lecture',                defPeriod:'aprem'},
+        {id:'travail',  emoji:'💼', name:'Tâches de travail',      defPeriod:'aprem'},
       ],
       soir: [
-        {id:'souper', emoji:'🍽️', name:'Souper', defPeriod:'soir'},
-        {id:'vais_s', emoji:'🫧', name:'Vaisselle du soir', defPeriod:'soir'},
-        {id:'med_s', emoji:'💊', name:'Médicaments — soir', defPeriod:'soir'},
-        {id:'douche', emoji:'🚿', name:'Douche', defPeriod:'soir'},
-        {id:'meditat', emoji:'🧘', name:'Méditation', defPeriod:'soir'},
-        {id:'loisir', emoji:'🎮', name:'Loisir', defPeriod:'soir'},
-        {id:'preparer', emoji:'📋', name:'Préparer le lendemain', defPeriod:'soir'},
-        {id:'lect_s', emoji:'📖', name:'Lecture du soir', defPeriod:'soir'},
-        {id:'gratitud', emoji:'🙏', name:'Note de gratitude', defPeriod:'soir'},
-        {id:'coucher', emoji:'🌙', name:'Heure de coucher', defPeriod:'soir'},
+        {id:'souper',   emoji:'🍽️', name:'Souper',                 defPeriod:'soir'},
+        {id:'vais_s',   emoji:'🫧', name:'Vaisselle du soir',      defPeriod:'soir'},
+        {id:'med_s',    emoji:'💊', name:'Médicaments — soir',     defPeriod:'soir'},
+        {id:'douche',   emoji:'🚿', name:'Douche',                 defPeriod:'soir'},
+        {id:'meditat',  emoji:'🧘', name:'Méditation',             defPeriod:'soir'},
+        {id:'loisir',   emoji:'🎮', name:'Loisir',                 defPeriod:'soir'},
+        {id:'preparer', emoji:'📋', name:'Préparer le lendemain',  defPeriod:'soir'},
+        {id:'lect_s',   emoji:'📖', name:'Lecture du soir',        defPeriod:'soir'},
+        {id:'coucher',  emoji:'🌙', name:'Heure de coucher',       defPeriod:'soir'},
       ],
       routine: [
-        {id:'epicerie', emoji:'🛒', name:'Épicerie', freq:'Hebdo', defPeriod:'aprem'},
-        {id:'menage', emoji:'🧹', name:'Grand ménage', freq:'Hebdo', defPeriod:'matin'},
-        {id:'lavage', emoji:'👕', name:'Lavage', freq:'Hebdo', defPeriod:'matin'},
-        {id:'rdv_med', emoji:'🏥', name:'Rendez-vous médical', freq:'Mensuel', defPeriod:'aprem'},
-        {id:'budget', emoji:'💰', name:'Vérification budget', freq:'Mensuel', defPeriod:'aprem'},
-        {id:'appel_fam', emoji:'📞', name:'Appel famille/amis', freq:'Hebdo', defPeriod:'soir'},
+        {id:'epicerie',  emoji:'🛒', name:'Épicerie',              defPeriod:'aprem'},
+        {id:'gmenage',   emoji:'🧹', name:'Grand ménage',          defPeriod:'matin'},
+        {id:'r_lavage',  emoji:'🧺', name:'Lavage',                defPeriod:'matin'},
+        {id:'rdv_med',   emoji:'🏥', name:'Rendez-vous médical',   defPeriod:'aprem'},
+        {id:'budget',    emoji:'💰', name:'Vérification budget',   defPeriod:'aprem'},
+        {id:'appel_fam', emoji:'📞', name:'Appel famille/amis',    defPeriod:'soir'},
       ],
       menage: [
-        {id:'men_lavage1',  emoji:'🦺', name:'Lavage — 1re brassée',     defPeriod:'matin'},
-        {id:'men_lavage2',  emoji:'🔄', name:'Lavage — 2e brassée',      defPeriod:'matin'},
-        {id:'men_seche',    emoji:'💨', name:'Sécheuse / Transfer',        defPeriod:'aprem'},
-        {id:'men_pliage',   emoji:'👕', name:'Plier/ranger le linge',       defPeriod:'soir'},
-        {id:'men_aspir',    emoji:'🧹', name:'Aspiration / Balayage',       defPeriod:'aprem'},
-        {id:'men_vaisselle',emoji:'🪣', name:'Vaisselle générale',          defPeriod:'aprem'},
-        {id:'men_sdb',      emoji:'🚿', name:'Nettoyage salle de bain',     defPeriod:'aprem'},
-        {id:'men_cuisine',  emoji:'🧼', name:'Nettoyage cuisine',           defPeriod:'aprem'},
-        {id:'men_planchers',emoji:'🪥', name:'Lavage des planchers',        defPeriod:'aprem'},
-        {id:'men_poubelle', emoji:'🗑️', name:'Sortir les poubelles',        defPeriod:'matin'},
-        {id:'men_literie',  emoji:'🛏️', name:'Changement de literie',        defPeriod:'matin'},
-        {id:'men_vitres',   emoji:'🪟', name:'Nettoyage des vitres',        defPeriod:'aprem'},
-        {id:'men_plantes',  emoji:'🌱', name:'Arrosage des plantes',        defPeriod:'matin'},
-        {id:'men_rangement',emoji:'📦', name:'Rangement général',          defPeriod:'aprem'},
-        {id:'men_epicerie', emoji:'🛒', name:'Épicerie',                    defPeriod:'aprem'},
-        {id:'men_ani_nourr',emoji:'🐾', name:'Soins animaux — nourriture',  defPeriod:'matin'},
-        {id:'men_ani_litie',emoji:'🨣', name:'Soins animaux — litière',    defPeriod:'matin'},
-        {id:'men_ani_prom', emoji:'🐕', name:'Soins animaux — promenade',  defPeriod:'aprem'},
-        {id:'men_ani_bain', emoji:'🛁', name:'Soins animaux — bain/toilette', defPeriod:'aprem'},
+        {id:'men_lavage1',   emoji:'🧺', name:'Lavage — 1re brassée',       defPeriod:'matin'},
+        {id:'men_lavage2',   emoji:'🔄', name:'Lavage — 2e brassée',        defPeriod:'matin'},
+        {id:'men_seche',     emoji:'💨', name:'Sécheuse / Transfert',       defPeriod:'aprem'},
+        {id:'men_pliage',    emoji:'👕', name:'Plier / Ranger le linge',    defPeriod:'soir'},
+        {id:'men_aspir',     emoji:'🧹', name:'Aspiration / Balayage',      defPeriod:'aprem'},
+        {id:'men_vaisselle', emoji:'🧼', name:'Vaisselle générale',         defPeriod:'aprem'},
+        {id:'men_sdb',       emoji:'🚿', name:'Nettoyage salle de bain',    defPeriod:'aprem'},
+        {id:'men_cuisine',   emoji:'🍳', name:'Nettoyage cuisine',          defPeriod:'aprem'},
+        {id:'men_planchers', emoji:'🪣', name:'Lavage des planchers',       defPeriod:'aprem'},
+        {id:'men_poubelle',  emoji:'🗑️', name:'Sortir les poubelles',       defPeriod:'matin'},
+        {id:'men_literie',   emoji:'🛏️', name:'Changement de literie',      defPeriod:'matin'},
+        {id:'men_vitres',    emoji:'🪟', name:'Nettoyage des vitres',       defPeriod:'aprem'},
+        {id:'men_plantes',   emoji:'🌿', name:'Arrosage des plantes',       defPeriod:'matin'},
+        {id:'men_rangement', emoji:'📦', name:'Rangement général',          defPeriod:'aprem'},
+        {id:'men_ani_nourr', emoji:'🐾', name:'Soins animaux — nourriture', defPeriod:'matin'},
+        {id:'men_ani_litie', emoji:'🐾', name:'Soins animaux — litière',    defPeriod:'matin'},
+        {id:'men_ani_prom',  emoji:'🐕', name:'Soins animaux — promenade',  defPeriod:'aprem'},
+        {id:'men_ani_bain',  emoji:'🛁', name:'Soins animaux — bain',       defPeriod:'aprem'},
       ],
       animaux: [
-        {id:'ani_nourr_m', emoji:'🍽️', name:'Nourriture — matin', defPeriod:'matin'},
-        {id:'ani_nourr_s', emoji:'🍽️', name:'Nourriture — soir', defPeriod:'soir'},
-        {id:'ani_eau', emoji:'💧', name:'Eau fraîche', defPeriod:'matin'},
+        {id:'ani_nourr_m', emoji:'🍽️', name:'Nourriture — matin',      defPeriod:'matin'},
+        {id:'ani_nourr_s', emoji:'🍽️', name:'Nourriture — soir',       defPeriod:'soir'},
+        {id:'ani_eau',     emoji:'💧', name:'Eau fraîche',              defPeriod:'matin'},
         {id:'ani_litiere', emoji:'🪣', name:'Litière / Cage / Enclos', defPeriod:'matin'},
-        {id:'ani_prom', emoji:'🦮', name:'Promenade', defPeriod:'aprem'},
-        {id:'ani_prom2', emoji:'🐕', name:'Promenade du soir', defPeriod:'soir'},
-        {id:'ani_jeux', emoji:'🎾', name:'Jeux / Exercice', defPeriod:'aprem'},
-        {id:'ani_bain', emoji:'🛁', name:'Bain / Toilettage', defPeriod:'aprem'},
-        {id:'ani_medic', emoji:'💊', name:'Médicaments animal', defPeriod:'matin'},
-        {id:'ani_dentes', emoji:'🦷', name:'Brossage des dents', defPeriod:'soir'},
-        {id:'ani_griffes', emoji:'✂️', name:'Coupe des griffes', defPeriod:'aprem'},
-        {id:'ani_vet', emoji:'🏥', name:'Vétérinaire', defPeriod:'aprem'},
-        {id:'ani_cage', emoji:'🏠', name:'Nettoyage cage/chenil', defPeriod:'matin'},
-        {id:'ani_birds', emoji:'🐦', name:'Soins oiseaux', defPeriod:'matin'},
-        {id:'ani_pois', emoji:'🐟', name:'Soins aquarium/poissons', defPeriod:'matin'},
+        {id:'ani_prom',    emoji:'🦮', name:'Promenade',                defPeriod:'aprem'},
+        {id:'ani_prom2',   emoji:'🐕', name:'Promenade du soir',        defPeriod:'soir'},
+        {id:'ani_jeux',    emoji:'🎾', name:'Jeux / Exercice',          defPeriod:'aprem'},
+        {id:'ani_bain',    emoji:'🛁', name:'Bain / Toilettage',        defPeriod:'aprem'},
+        {id:'ani_medic',   emoji:'💊', name:'Médicaments animal',       defPeriod:'matin'},
+        {id:'ani_dentes',  emoji:'🦷', name:'Brossage des dents',       defPeriod:'soir'},
+        {id:'ani_vet',     emoji:'🏥', name:'Vétérinaire',              defPeriod:'aprem'},
       ],
       medical: [
-        {id:'rmed_glycemie', emoji:'🩸', name:'Prise glycémie',         defPeriod:'matin'},
-        {id:'rmed_tension',  emoji:'💉', name:'Prise de tension',           defPeriod:'matin'},
-        {id:'rmed_poids',    emoji:'⚖️',    name:'Pesée du matin',          defPeriod:'matin'},
-        {id:'rmed_sato2',    emoji:'🫀', name:'Saturation O₂',          defPeriod:'matin'},
-        {id:'rmed_temp',     emoji:'🌡️', name:'Température',             defPeriod:'matin'},
-        {id:'rmed_fc',       emoji:'❤️',   name:'Fréquence cardiaque',   defPeriod:'matin'},
-        {id:'rmed_douleur',  emoji:'🤕', name:'Niveau de douleur',          defPeriod:'matin'},
-        {id:'rmed_sommeil',  emoji:'💤', name:'Heures de sommeil',          defPeriod:'matin'},
-        {id:'rmed_humeur',   emoji:'😊', name:'Humeur du jour',             defPeriod:'matin'},
-      ]
+        {id:'rmed_glycemie', emoji:'🩸', name:'Prise glycémie',          defPeriod:'matin'},
+        {id:'rmed_tension',  emoji:'💉', name:'Prise de tension',         defPeriod:'matin'},
+        {id:'rmed_poids',    emoji:'⚖️', name:'Pesée du matin',           defPeriod:'matin'},
+        {id:'rmed_sato2',    emoji:'🫀', name:'Saturation O₂',            defPeriod:'matin'},
+        {id:'rmed_temp',     emoji:'🌡️', name:'Température',              defPeriod:'matin'},
+        {id:'rmed_fc',       emoji:'❤️', name:'Fréquence cardiaque',      defPeriod:'matin'},
+        {id:'rmed_douleur',  emoji:'🤕', name:'Niveau de douleur',        defPeriod:'matin'},
+        {id:'rmed_sommeil',  emoji:'💤', name:'Heures de sommeil',        defPeriod:'matin'},
+        {id:'rmed_humeur',   emoji:'😊', name:'Humeur du jour',           defPeriod:'matin'},
+      ],
     };
 
-    function loadSt() { return JSON.parse(localStorage.getItem('mj_v4') || '{}'); }
-    function saveSt() { localStorage.setItem('mj_v4', JSON.stringify(ST)); }
     var ST = loadSt();
-    if (!ST.activeTasks)  ST.activeTasks  = {};
-    if (!ST.completions)  ST.completions  = {};
-    if (!ST.notes)        ST.notes        = {};
-    if (!ST.medLogs)      ST.medLogs      = {};
-    if (!ST.sante)        ST.sante        = {};
-    if (!ST.menus)        ST.menus        = {};
-    if (!ST.epicItems)    ST.epicItems    = [];
-    if (!ST.customTasks)  ST.customTasks  = {matin:[],aprem:[],soir:[]};
-    if (!ST.taskFreq)     ST.taskFreq     = {};
-    if (!ST.taskOrder)    ST.taskOrder    = {};
-    if (!ST.journal)      ST.journal      = {};
+
+    if (!ST.activeTasks) ST.activeTasks = {};
+    if (!ST.completions) ST.completions = {};
+    if (!ST.notes) ST.notes = {};
+    if (!ST.medLogs) ST.medLogs = {};
+    if (!ST.sante) ST.sante = {};
+    if (!ST.menus) ST.menus = {};
+    if (!ST.epicItems) ST.epicItems = [];
+    if (!ST.customTasks) ST.customTasks = {matin:[],aprem:[],soir:[]};
+    if (!ST.taskFreq) ST.taskFreq = {};
+    if (!ST.taskOrder) ST.taskOrder = {};
+    if (!ST.journal) ST.journal = {};
     if (!ST.medValueOpen) ST.medValueOpen = {};
-    function todayKey() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
-    function keyFromDate(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
-    function dateFromKey(k) { const [y,m,d] = k.split('-'); return new Date(y,m-1,d); }
-    function shiftDay(key, n) { const d = dateFromKey(key); d.setDate(d.getDate()+n); return keyFromDate(d); }
-    function formatLong(k) { const d = dateFromKey(k); return JOURS_FR[d.getDay()] + ' ' + d.getDate() + ' ' + MOIS_FR[d.getMonth()]; }
-    function formatShort(k) { const d = dateFromKey(k); return d.getDate() + '/' + String(d.getMonth()+1).padStart(2,'0'); }
-    function mondayOfWeek(dateKey) { const d = dateFromKey(dateKey); const first = new Date(d.getFullYear(), d.getMonth(), d.getDate()); const day = first.getDay(); const diff = first.getDate() - day + (day === 0 ? -6 : 1); return keyFromDate(new Date(d.getFullYear(), d.getMonth(), diff)); }
-    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    if (!ST.todos) ST.todos = [];
+    if (!ST.activeDay) ST.activeDay = todayKey();
+    if (!ST.santeDate) ST.santeDate = todayKey();
+    if (!ST.santeView) ST.santeView = 'form';
+    if (!ST.santeMonth) ST.santeMonth = '';
+    if (!ST.weekDays) ST.weekDays = 7;
+    if (!ST.weekOffset) ST.weekOffset = 0;
+    if (!ST.epicMode) ST.epicMode = 'liste';
+    if (!ST.epicCat) ST.epicCat = '';
+    if (!ST.menuWeekOffset) ST.menuWeekOffset = 0;
+    if (!ST.dark) ST.dark = false;
+    if (!ST.journalOpen) ST.journalOpen = false;
+    if (!ST.showGratHisto) ST.showGratHisto = false;
+    if (!ST.showTodoHisto) ST.showTodoHisto = false;
+    if (!ST.medFormOpen) ST.medFormOpen = false;
+
+    var activeTab = 'jour';
+
+    function loadSt() {
+      var j = localStorage.getItem('mj_v4');
+      return j ? JSON.parse(j) : {};
+    }
+
+    function saveSt() {
+      localStorage.setItem('mj_v4', JSON.stringify(ST));
+      render();
+    }
+
+    function todayKey() {
+      var d = new Date();
+      return keyFromDate(d);
+    }
+
+    function keyFromDate(d) {
+      var y = d.getFullYear();
+      var m = String(d.getMonth()+1).padStart(2,'0');
+      var day = String(d.getDate()).padStart(2,'0');
+      return y+'-'+m+'-'+day;
+    }
+
+    function dateFromKey(k) {
+      var p = k.split('-');
+      return new Date(p[0], p[1]-1, p[2]);
+    }
+
+    function shiftDay(key, n) {
+      var d = dateFromKey(key);
+      d.setDate(d.getDate() + n);
+      return keyFromDate(d);
+    }
+
+    function formatLong(key) {
+      var d = dateFromKey(key);
+      var dow = JOURS_FULL[d.getDay()];
+      return dow+' '+d.getDate()+' '+MOIS_FR[d.getMonth()];
+    }
+
+    function formatShort(key) {
+      var d = dateFromKey(key);
+      return JOURS_COURT[d.getDay()]+' '+d.getDate();
+    }
+
+    function mondayOfWeek(key) {
+      var d = dateFromKey(key);
+      var dow = d.getDay();
+      var delta = dow === 0 ? -6 : 1-dow;
+      d.setDate(d.getDate() + delta);
+      return keyFromDate(d);
+    }
+
+    function esc(s) {
+      var m = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+      return s.replace(/[&<>"']/g, function(c){ return m[c]; });
+    }
 
     function taskMatchesDay(taskId, dateKey) {
-      if (!ST.activeTasks[taskId]) return false;
-      const freq = ST.taskFreq[taskId] || 'Quotidien';
+      var freq = ST.taskFreq[taskId] || 'Quotidien';
       if (freq === 'Quotidien') return true;
-      const d = dateFromKey(dateKey);
-      const dow = d.getDay();
+      var d = dateFromKey(dateKey);
+      var dow = d.getDay();
       if (freq === 'Sem.') return dow >= 1 && dow <= 5;
       if (freq === 'W-E') return dow === 0 || dow === 6;
-      if (freq === 'Perso') return !!(ST.taskFreq[taskId+'_days'] && ST.taskFreq[taskId+'_days'][dow]);
+      if (freq === 'Perso') {
+        var k = taskId + '_days';
+        var d = ST.taskFreq[k] || {};
+        return !!d[dow];
+      }
       return true;
     }
 
-    function getActiveByPeriod() {
-      const active = {matin:[], aprem:[], soir:[]};
-      for (const cat of ['matin','aprem','soir','routine','menage','animaux','medical']) {
-        const tasks = DEFAULT_TASKS[cat];
-        for (const t of tasks) {
-          if (ST.activeTasks[t.id]) {
-            const p = ST.activeTasks[t.id];
-            if (!active[p]) active[p] = [];
-            active[p].push(t);
-          }
-        }
-      }
-      for (const t of (ST.customTasks.matin || [])) { if (!active.matin) active.matin=[]; active.matin.push(t); }
-      for (const t of (ST.customTasks.aprem || [])) { if (!active.aprem) active.aprem=[]; active.aprem.push(t); }
-      for (const t of (ST.customTasks.soir || [])) { if (!active.soir) active.soir=[]; active.soir.push(t); }
-      for (const p of ['matin','aprem','soir']) {
-        active[p].sort((a,b) => (ST.taskOrder[a.id] || 999) - (ST.taskOrder[b.id] || 999));
-      }
-      return active;
+    function getActiveByPeriod(period, dateKey) {
+      var r = [];
+      var allTasks = {};
+      Object.keys(DEFAULT_TASKS).forEach(function(cat){
+        DEFAULT_TASKS[cat].forEach(function(t){
+          allTasks[t.id] = t;
+        });
+      });
+      Object.keys(allTasks).forEach(function(id){
+        if (!taskMatchesDay(id, dateKey)) return;
+        var p = ST.activeTasks[id] || DEFAULT_TASKS[allTasks[id].defPeriod ? Object.keys(DEFAULT_TASKS).find(function(c){return DEFAULT_TASKS[c].some(function(t){return t.id===id;});}) : 'matin'].find(function(t){return t.id===id;}).defPeriod;
+        if (p === period) r.push(id);
+      });
+      (ST.customTasks[period] || []).forEach(function(id){
+        if (taskMatchesDay(id, dateKey)) r.push(id);
+      });
+      var ord = function(id){ return ST.taskOrder[id] || 0; };
+      r.sort(function(a,b){ return ord(a) - ord(b); });
+      return r;
     }
 
-    function renderToday() {
-      const today = ST.activeDay;
-      const active = getActiveByPeriod();
-      const comp = ST.completions[today] || {};
-      const allTasks = [].concat(active.matin, active.aprem, active.soir)
-        .filter(t => taskMatchesDay(t.id, today));
-      const total = allTasks.length;
-      const done = allTasks.filter(t => comp[t.id]).length;
-      const pct = total ? Math.round(100*done/total) : 0;
-
-      let html = '<div class="day-nav"><button onclick="shiftActiveDay(-1)">←</button><div>' + esc(formatLong(today)) + '</div><button onclick="shiftActiveDay(1)">→</button></div>';
-      html += '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div><div style="text-align:center;font-size:12px;color:var(--sub);margin-bottom:16px;">' + done + '/' + total + ' (' + pct + '%)</div>';
-
-      for (const period of ['matin','aprem','soir']) {
-        const tasks = active[period].filter(t => taskMatchesDay(t.id, today));
-        if (!tasks.length) continue;
-        html += '<div class="section"><div class="section-header ' + period + '">' + (period==='matin'?'🌅 Matin':period==='aprem'?'☀️ Après-midi':'🌙 Soir') + '</div>';
-        for (const t of tasks) {
-          const isDone = comp[t.id];
-          const note = (ST.notes[today]||{})[t.id];
-          const showNote = ST.activeTasks[t.id+'_noteOpen'];
-          const medDef = MED_TASKS[t.id];
-          const showMedForm = medDef && ST.medValueOpen && ST.medValueOpen[t.id];
-          const santeDay = (ST.sante && ST.sante[today]) || {};
-          let medBadge = '';
-          if (medDef) {
-            if (medDef.type === 'tension' && santeDay.tension_s && santeDay.tension_d) {
-              medBadge = santeDay.tension_s + '/' + santeDay.tension_d + ' mmHg';
-            } else if (medDef.field && santeDay[medDef.field] !== undefined && santeDay[medDef.field] !== '') {
-              medBadge = santeDay[medDef.field] + ' ' + (medDef.unit||'');
-            } else if (t.id === 'rmed_humeur' && santeDay.humeur) {
-              const HUM = ['😞','😕','😐','🙂','😄'];
-              medBadge = HUM[santeDay.humeur-1];
-            }
-          }
-          html += '<div class="task-card' + (isDone?' done':'') + '"><div class="task-reorder"><button class="reorder-btn" onclick="moveTask(\'' + period + '\',\'' + esc(t.id) + '\',-1)">▲</button><button class="reorder-btn" onclick="moveTask(\'' + period + '\',\'' + esc(t.id) + '\',' + 1 + ')">▼</button></div>';
-          html += '<button class="checkbox-circle' + (isDone?' checked':'') + '" onclick="toggleComp(\'' + esc(t.id) + '\')"></button>';
-          html += '<div class="task-content"><div class="task-name">' + t.emoji + ' ' + esc(t.name) + '</div>';
-          if (medBadge) html += '<div><span class="med-badge">📊 ' + esc(medBadge) + '</span></div>';
-          if (note) html += '<div class="task-note">📝 ' + esc(note.substring(0,50)) + (note.length>50?'...':'') + '</div>';
-          html += '</div>';
-          if (medDef) html += '<button class="note-btn" title="Saisir mesure" onclick="toggleMedValueForm(\'' + esc(t.id) + '\')">📊</button>';
-          html += '<button class="note-btn" onclick="toggleNote(\'' + esc(t.id) + '\')">📝</button>';
-          html += '</div>';
-          if (showMedForm) {
-            const mval_s = santeDay.tension_s || '';
-            const mval_d = santeDay.tension_d || '';
-            const mval   = (medDef.field ? santeDay[medDef.field] : '') || '';
-            if (medDef.type === 'tension') {
-              html += '<div class="med-value-form"><label>' + medDef.label + ' (mmHg)</label>';
-              html += '<div style="display:flex;gap:8px;align-items:center;">';
-              html += '<input type="number" id="medval_s_' + esc(t.id) + '" placeholder="Sys. ex:120" value="' + esc(mval_s) + '">';
-              html += '<span style="font-size:20px;padding:0 4px;">/</span>';
-              html += '<input type="number" id="medval_d_' + esc(t.id) + '" placeholder="Dia. ex:80" value="' + esc(mval_d) + '">';
-              html += '</div>';
-            } else if (t.id === 'rmed_humeur') {
-              const HUM = ['😞','😕','😐','🙂','😄'];
-              html += '<div class="med-value-form"><label>Humeur du jour</label><div class="humeur-picker">';
-              for (var hh=1; hh<=5; hh++) {
-                html += '<button class="humeur-btn' + (santeDay.humeur==hh?' active':'') + '" onclick="saveMedValue(\'' + esc(t.id) + '\',\'' + today + '\',' + hh + ')">' + HUM[hh-1] + '</button>';
-              }
-              html += '</div>';
-            } else {
-              html += '<div class="med-value-form"><label>' + medDef.label + (medDef.unit ? ' (' + medDef.unit + ')' : '') + '</label>';
-              html += '<input type="number"' + (medDef.step?' step="'+medDef.step+'"':'') + (medDef.max?' max="'+medDef.max+'"':'') + ' id="medval_' + esc(t.id) + '" placeholder="' + (medDef.ph||'') + '" value="' + esc(mval) + '">';
-            }
-            if (t.id !== 'rmed_humeur') {
-              html += '<div style="display:flex;gap:8px;margin-top:8px;">';
-              html += '<button class="btn" onclick="saveMedValue(\'' + esc(t.id) + '\',\'' + today + '\')">✅ Enregistrer</button>';
-              html += '<button class="btn secondary" onclick="toggleMedValueForm(\'' + esc(t.id) + '\')">Annuler</button>';
-              html += '</div>';
-            }
-            html += '</div>';
-          }
-          if (showNote) {
-            html += '<div class="task-card" style="margin-left:40px;padding:0;border:none;background:none;"><div style="width:100%"><div class="note-area"><textarea class="note-textarea" id="note_' + esc(t.id) + '" placeholder="Ajouter une note...">' + esc(note||'') + '</textarea></div><div class="note-buttons"><button class="btn" onclick="saveNote(\'' + esc(t.id) + '\')">Enregistrer</button><button class="btn secondary" onclick="toggleNote(\'' + esc(t.id) + '\')">Annuler</button><button class="btn secondary" onclick="deleteNote(\'' + esc(t.id) + '\')">Supprimer</button></div></div></div>';
-          }
-        }
-        html += '</div>';
-      }
-
-      html += '<div class="section"><div class="section-header" style="background:#e879f9;">💊 Médicaments</div>';
-      html += '<button class="btn" style="width:100%;margin-bottom:12px;" onclick="toggleMedForm()">+ Ajouter médicament</button>';
-      if (ST.medFormOpen) {
-        html += '<div class="card"><div class="input-row"><input type="time" id="med_time" placeholder="Heure"><input type="text" id="med_name" placeholder="Médicament"></div>';
-        html += '<div class="input-row"><input type="number" id="med_dose" placeholder="Dose" style="flex:1;"><select id="med_pain" onchange="setPain(this.value)" style="flex:1;"><option value="">Douleur (0-10)</option>';
-        for (let i=0; i<=10; i++) html += '<option value="' + i + '">' + i + '</option>';
-        html += '</select></div><button class="btn" style="width:100%" onclick="addMedEntry()">Ajouter</button></div>';
-      }
-      const medLogs = ST.medLogs[today] || [];
-      for (const m of medLogs) {
-        const painClass = m.pain <= 3 ? 'pain-0' : m.pain <= 6 ? 'pain-4' : 'pain-7';
-        html += '<div class="med-entry"><div><span class="med-time">' + esc(m.time) + '</span> <strong>' + esc(m.name) + '</strong> ' + esc(m.dose) + '</div><div><span class="med-pain ' + painClass + '">' + m.pain + '/10</span> <button class="btn-icon" onclick="delMedEntry(\'' + esc(m.id) + '\')">✕</button></div></div>';
-      }
-      html += '</div>';
-
-      html += renderJournalSection(today);
-
-      document.getElementById('content').innerHTML = html;
+    function moveTask(id, dir) {
+      var o = ST.taskOrder[id] || 0;
+      ST.taskOrder[id] = o + (dir > 0 ? 10 : -10);
+      saveSt();
     }
 
-    function renderJournalSection(dateKey) {
-      var j = (ST.journal || {})[dateKey] || {};
-      var open = ST.journalOpen ? ' open' : '';
-
-      var gratHisto = '';
-      if (ST.showGratHisto) {
-        var gratKeys = Object.keys(ST.journal || {})
-          .filter(function(k){ return k !== dateKey && ST.journal[k].gratitude; })
-          .sort().reverse().slice(0, 10);
-        if (gratKeys.length > 0) {
-          gratHisto = '<div style="margin-top:8px;">';
-          for (var gi=0; gi<gratKeys.length; gi++) {
-            var gk = gratKeys[gi];
-            gratHisto += '<div class="gratitude-entry"><div class="gratitude-entry-date">' + esc(formatLong(gk)) + '</div>' + esc(ST.journal[gk].gratitude) + '</div>';
-          }
-          gratHisto += '</div>';
-        } else {
-          gratHisto = '<div style="color:var(--sub);font-size:13px;padding:8px 0;">Aucune gratitude enregistrée pour les jours précédents.</div>';
-        }
-      }
-
-      var html = '<div class="journal-card">';
-      html += '<div class="journal-header" onclick="toggleJournal()">';
-      html += '<span>📓 Journal du jour</span><span>' + (ST.journalOpen ? '▲' : '▼') + '</span></div>';
-      html += '<div class="journal-body' + open + '">';
-      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">';
-      html += '<div class="journal-row"><label>⏰ Heure de lever</label><input type="time" value="' + esc(j.lever||'') + '" onchange="saveJournal(\'' + esc(dateKey) + '\',\'lever\',this.value)" onblur="saveJournal(\'' + esc(dateKey) + '\',\'lever\',this.value)"></div>';
-      html += '<div class="journal-row"><label>🌙 Heure de coucher</label><input type="time" value="' + esc(j.coucher||'') + '" onchange="saveJournal(\'' + esc(dateKey) + '\',\'coucher\',this.value)" onblur="saveJournal(\'' + esc(dateKey) + '\',\'coucher\',this.value)"></div>';
-      html += '</div>';
-      html += '<div class="journal-row"><label>📚 Devoirs / Études</label><textarea placeholder="Notes de cours, devoirs, lectures..." onchange="saveJournal(\'' + esc(dateKey) + '\',\'devoirs\',this.value)" onblur="saveJournal(\'' + esc(dateKey) + '\',\'devoirs\',this.value)">' + esc(j.devoirs||'') + '</textarea></div>';
-      html += '<div class="journal-row"><label>💼 Travail</label><textarea placeholder="Tâches, réunions, notes de travail..." onchange="saveJournal(\'' + esc(dateKey) + '\',\'travail\',this.value)" onblur="saveJournal(\'' + esc(dateKey) + '\',\'travail\',this.value)">' + esc(j.travail||'') + '</textarea></div>';
-      html += '<div class="journal-row"><label style="color:#f59e0b;">🙏 Gratitude du jour</label><textarea placeholder="Je suis reconnaissant(e) pour..." onchange="saveJournal(\'' + esc(dateKey) + '\',\'gratitude\',this.value)" onblur="saveJournal(\'' + esc(dateKey) + '\',\'gratitude\',this.value)">' + esc(j.gratitude||'') + '</textarea></div>';
-      html += '<button class="btn secondary" style="width:100%;font-size:12px;" onclick="toggleGratHisto()">' + (ST.showGratHisto ? '▲ Masquer' : '📅 Gratitudes précédentes') + '</button>';
-      if (gratHisto) html += gratHisto;
-      html += '</div></div>';
-      return html;
+    function toggleComp(id, dateKey) {
+      if (!ST.completions[dateKey]) ST.completions[dateKey] = {};
+      ST.completions[dateKey][id] = !ST.completions[dateKey][id];
+      saveSt();
     }
 
-    function saveJournal(dateKey, field, val) {
-      if (!ST.journal) ST.journal = {};
-      if (!ST.journal[dateKey]) ST.journal[dateKey] = {};
-      if (val === '' || val === null) {
-        delete ST.journal[dateKey][field];
+    function toggleNote(id) {
+      var k = 'note_'+id;
+      var v = ST.medValueOpen[k];
+      ST.medValueOpen[k] = !v;
+      saveSt();
+    }
+
+    function saveNote(id, txt, dateKey) {
+      if (!ST.notes[dateKey]) ST.notes[dateKey] = {};
+      ST.notes[dateKey][id] = txt;
+      ST.medValueOpen['note_'+id] = false;
+      saveSt();
+    }
+
+    function deleteNote(id, dateKey) {
+      if (!ST.notes[dateKey]) return;
+      delete ST.notes[dateKey][id];
+      saveSt();
+    }
+
+    function toggleTask(id) {
+      if (ST.activeTasks[id] === undefined) {
+        var defP = 'matin';
+        Object.keys(DEFAULT_TASKS).some(function(c){
+          var t = DEFAULT_TASKS[c].find(function(x){return x.id===id;});
+          if (t) { defP = t.defPeriod; return true; }
+          return false;
+        });
+        ST.activeTasks[id] = defP;
       } else {
-        ST.journal[dateKey][field] = val;
+        delete ST.activeTasks[id];
       }
       saveSt();
     }
 
-    function toggleJournal() {
-      ST.journalOpen = !ST.journalOpen;
+    function setPeriod(id, p) {
+      ST.activeTasks[id] = p;
       saveSt();
-      renderToday();
     }
 
-    function toggleGratHisto() {
-      ST.showGratHisto = !ST.showGratHisto;
+    function setFreq(id, freq) {
+      ST.taskFreq[id] = freq;
+      if (freq !== 'Perso') delete ST.taskFreq[id+'_days'];
       saveSt();
-      renderToday();
     }
 
-    function renderWeek() {
-      const week = ST.weekOffset || 0;
-      const today = ST.activeDay;
-      const firstDay = mondayOfWeek(today);
-      let startKey = firstDay;
-      for (let i=0; i<7*week; i++) startKey = shiftDay(startKey, 1);
+    function toggleFreqDay(id, dow) {
+      if (!ST.taskFreq[id+'_days']) ST.taskFreq[id+'_days'] = {};
+      ST.taskFreq[id+'_days'][dow] = !ST.taskFreq[id+'_days'][dow];
+      saveSt();
+    }
 
-      const dayCount = ST.weekDays || 7;
-      const opts = [3,7,14,30];
-      let html = '<div class="week-selector">';
-      for (const opt of opts) {
-        html += '<button class="week-btn' + (dayCount===opt?' active':'') + '" onclick="setWeekDays(' + opt + ')">' + opt + 'j</button>';
-      }
-      html += '</div><div class="day-nav"><button onclick="navWeek(-1)">←</button><div>' + esc(formatShort(startKey)) + ' — ' + esc(formatShort(shiftDay(startKey, dayCount-1))) + '</div><button onclick="navWeek(1)">→</button></div>';
-
-      const active = getActiveByPeriod();
-      for (let i=0; i<dayCount; i++) {
-        const key = shiftDay(startKey, i);
-        const isToday = key === today;
-        const comp = ST.completions[key] || {};
-        const tasks = [].concat(active.matin, active.aprem, active.soir).filter(t => taskMatchesDay(t.id, key));
-        const done = tasks.filter(t => comp[t.id]).length;
-        const pct = tasks.length ? Math.round(100*done/tasks.length) : 0;
-        const hasNotes = [].concat(active.matin, active.aprem, active.soir).some(t => (ST.notes[key]||{})[t.id]);
-
-        html += '<div class="day-card"><div class="day-card-header' + (isToday?' open':'') + '" onclick="toggleDayCard(this)"><div><strong>' + esc(formatLong(key)) + '</strong>' + (hasNotes?' 📝':'') + '</div><div class="day-progress">' + done + '/' + tasks.length + ' — ' + pct + '%</div></div>';
-        html += '<div class="day-card-content' + (isToday?' open':'') + '">';
-        for (const period of ['matin','aprem','soir']) {
-          const periodTasks = active[period].filter(t => taskMatchesDay(t.id, key));
-          if (!periodTasks.length) continue;
-          html += '<div style="margin-bottom:12px;"><div class="section-header ' + period + '" style="margin-bottom:8px;">' + (period==='matin'?'🌅 Matin':period==='aprem'?'☀️ Après-midi':'🌙 Soir') + '</div>';
-          for (const t of periodTasks) {
-            const isDone = comp[t.id];
-            const note = (ST.notes[key]||{})[t.id];
-            html += '<div style="background:var(--bg);padding:8px;border-radius:8px;margin-bottom:4px;display:flex;align-items:center;gap:8px;"><input type="checkbox"' + (isDone?' checked':'') + ' onchange="toggleComp(\'' + esc(t.id) + '\',\'' + esc(key) + '\')">';
-            html += '<span>' + t.emoji + ' ' + esc(t.name) + '</span>';
-            if (note) html += ' <span style="font-size:12px;color:var(--sub);">📝</span>';
-            html += '</div>';
+    function bulkToggle(period, allOn) {
+      Object.keys(DEFAULT_TASKS).forEach(function(cat){
+        DEFAULT_TASKS[cat].forEach(function(t){
+          if (t.defPeriod === period) {
+            if (allOn) ST.activeTasks[t.id] = period;
+            else delete ST.activeTasks[t.id];
           }
-          html += '</div>';
-        }
-        html += '</div></div>';
-      }
-
-      document.getElementById('content').innerHTML = html;
+        });
+      });
+      saveSt();
     }
 
-    function renderEpic() {
-      const mode = ST.epicMode || 'liste';
-      let html = '<div class="epic-tabs"><button class="epic-tab' + (mode==='liste'?' active':'') + '" onclick="setEpicMode(\'liste\')">🛒 Liste d\'épicerie</button><button class="epic-tab' + (mode==='menu'?' active':'') + '" onclick="setEpicMode(\'menu\')">🍽️ Menu semaine</button></div>';
-
-      if (mode === 'liste') {
-        html += '<div style="margin-bottom:12px;"><div style="display:flex;gap:8px;flex-wrap:wrap;"><input type="text" id="epic_item" placeholder="Ajouter un article..."><select id="epic_cat" style="flex:1;"><option value="fruits">🥦 Fruits & Légumes</option><option value="viande">🥩 Viandes</option><option value="fromage">🧀 Laitiers</option><option value="epice">🥫 Épicerie</option><option value="autre">🛍️ Autres</option></select><button class="btn" onclick="epicAdd()">+</button></div></div>';
-        html += '<div class="epic-cat-select">';
-        const cats = Object.keys(CATEGORIES);
-        for (const cat of cats) {
-          html += '<button class="epic-cat-btn' + (ST.epicCat===cat?' active':'') + '" onclick="setEpicCat(\'' + cat + '\')">' + CATEGORIES[cat] + '</button>';
-        }
-        html += '</div>';
-
-        const filtered = (ST.epicItems || []).filter(it => !ST.epicCat || it.cat === ST.epicCat);
-        for (const item of filtered) {
-          html += '<div class="epic-item"><input type="checkbox"' + (item.checked?' checked':'') + ' onchange="epicToggle(\'' + esc(item.id) + '\')"><span class="item-name">' + esc(item.name) + '</span><span class="item-cat">' + CATEGORIES[item.cat] + '</span><button class="btn-icon" onclick="epicDel(\'' + esc(item.id) + '\')">✕</button></div>';
-        }
-        if (filtered.length > 0) html += '<button class="btn" style="width:100%;margin-top:12px;" onclick="epicClearChecked()">Effacer les cochés</button>';
-      } else {
-        const week = ST.menuWeekOffset || 0;
-        const today = ST.activeDay;
-        const firstDay = mondayOfWeek(today);
-        let startKey = firstDay;
-        for (let i=0; i<7*week; i++) startKey = shiftDay(startKey, 1);
-        html += '<div class="day-nav"><button onclick="menuNavWeek(-1)">←</button><div>' + esc(formatShort(startKey)) + ' — ' + esc(formatShort(shiftDay(startKey, 6))) + '</div><button onclick="menuNavWeek(1)">→</button></div>';
-
-        for (let i=0; i<7; i++) {
-          const key = shiftDay(startKey, i);
-          const d = dateFromKey(key);
-          const dow = d.getDay();
-          const dayName = JOURS_FR[dow];
-          html += '<div class="card"><div class="card-title">' + dayName + ' ' + d.getDate() + '</div>';
-          const meals = ST.menus[key] || {dej:'',diner:'',souper:''};
-          for (const [mealKey, mealLabel] of Object.entries(MEALS)) {
-            html += '<div class="meal-input"><span class="meal-icon">' + mealLabel.substring(0,1) + '</span><input type="text" placeholder="' + mealLabel + '" value="' + esc(meals[mealKey]||'') + '" onchange="saveMenu(\'' + esc(key) + '\',\'' + mealKey + '\',this.value)" onblur="saveMenu(\'' + esc(key) + '\',\'' + mealKey + '\',this.value)"></div>';
-          }
-          html += '</div>';
-        }
-      }
-
-      document.getElementById('content').innerHTML = html;
+    function addCustomTask(period, txt) {
+      if (!ST.customTasks[period]) ST.customTasks[period] = [];
+      var id = 'custom_'+Date.now();
+      ST.customTasks[period].push(id);
+      ST.activeTasks[id] = period;
+      ST.taskFreq[id] = 'Quotidien';
+      saveSt();
     }
 
-    function renderSante() {
-      const view = ST.santeView || 'form';
-      let html = '<div class="sante-sub-tabs"><button class="sante-sub-tab' + (view==='form'?' active':'') + '" onclick="setSanteView(\'form\')">📋 Saisie</button><button class="sante-sub-tab' + (view==='cal'?' active':'') + '" onclick="setSanteView(\'cal\')">📅 Calendrier</button><button class="sante-sub-tab' + (view==='histo'?' active':'') + '" onclick="setSanteView(\'histo\')">📈 Historique</button></div>';
-
-      if (view === 'form') {
-        html += renderSanteForm();
-      } else if (view === 'cal') {
-        html += renderSanteCal();
-      } else {
-        html += renderSanteHisto();
-      }
-
-      document.getElementById('content').innerHTML = html;
+    function toggleMedValueForm(id) {
+      var k = 'med_'+id;
+      ST.medValueOpen[k] = !ST.medValueOpen[k];
+      saveSt();
     }
 
-     function renderSanteForm() {
-       const dateKey = ST.santeDate || todayKey();
-       const data = ST.sante[dateKey] || {};
-       const today = todayKey();
-       const canGoForward = dateKey >= today;
-       const HUMEURS = ['😞','😕','😐','🙂','😄'];
-
-       let html = '<div class="day-nav"><button onclick="shiftSanteDate(-1)">←</button><div>' + esc(formatLong(dateKey)) + '</div><button onclick="shiftSanteDate(1)"' + (!canGoForward?' disabled':'') + '>→</button></div>';
-
-       // Mesures corporelles
-       html += '<div class="card"><div class="card-title">📊 Mesures corporelles</div>';
-       html += '<div class="sante-form-row"><label>⚖️ Poids (kg)</label><input type="number" step="0.1" placeholder="0.0" value="' + esc(data.poids||'') + '" onchange="saveSante(\'' + esc(dateKey) + '\',\'poids\',this.value)" onblur="saveSante(\'' + esc(dateKey) + '\',\'poids\',this.value)"></div>';
-       html += '<div class="sante-form-row"><label>💉 Tension artérielle (mmHg)</label><div style="display:flex;gap:8px;align-items:center;"><input type="number" placeholder="Sys." value="' + esc(data.tension_s||'') + '" onchange="saveSante(\'' + esc(dateKey) + '\',\'tension_s\',this.value)" onblur="saveSante(\'' + esc(dateKey) + '\',\'tension_s\',this.value)"><span style="padding:4px 8px;font-size:18px;">/</span><input type="number" placeholder="Dia." value="' + esc(data.tension_d||'') + '" onchange="saveSante(\'' + esc(dateKey) + '\',\'tension_d\',this.value)" onblur="saveSante(\'' + esc(dateKey) + '\',\'tension_d\',this.value)"></div></div>';
-       html += '<div class="sante-form-row"><label>🩸 Glycémie (mmol/L)</label><input type="number" step="0.1" placeholder="0.0" value="' + esc(data.glycemie||'') + '" onchange="saveSante(\'' + esc(dateKey) + '\',\'glycemie\',this.value)" onblur="saveSante(\'' + esc(dateKey) + '\',\'glycemie\',this.value)"></div>';
-       html += '<div class="sante-form-row"><label>🫀 Sat. O₂ (%)</label><input type="number" min="0" max="100" placeholder="95" value="' + esc(data.sato2||'') + '" onchange="saveSante(\'' + esc(dateKey) + '\',\'sato2\',this.value)" onblur="saveSante(\'' + esc(dateKey) + '\',\'sato2\',this.value)"></div>';
-       html += '<div class="sante-form-row"><label>🌡️ Température (°C)</label><input type="number" step="0.1" placeholder="37.0" value="' + esc(data.temp||'') + '" onchange="saveSante(\'' + esc(dateKey) + '\',\'temp\',this.value)" onblur="saveSante(\'' + esc(dateKey) + '\',\'temp\',this.value)"></div>';
-       html += '<div class="sante-form-row"><label>❤️ Fréquence cardiaque (bpm)</label><input type="number" placeholder="ex: 70" value="' + esc(data.fc||'') + '" onchange="saveSante(\'' + esc(dateKey) + '\',\'fc\',this.value)" onblur="saveSante(\'' + esc(dateKey) + '\',\'fc\',this.value)"></div>';
-       html += '</div>';
-
-       // Bien-être
-       html += '<div class="card"><div class="card-title">🌟 Bien-être</div>';
-       html += '<div class="sante-form-row"><label>💤 Heures de sommeil</label><input type="number" step="0.5" min="0" max="24" placeholder="8" value="' + esc(data.sommeil||'') + '" onchange="saveSante(\'' + esc(dateKey) + '\',\'sommeil\',this.value)" onblur="saveSante(\'' + esc(dateKey) + '\',\'sommeil\',this.value)"></div>';
-       html += '<div class="sante-form-row"><label>🤕 Douleur générale (0-10)</label><input type="number" min="0" max="10" placeholder="0" value="' + esc(data.douleur!==undefined&&data.douleur!==''?data.douleur:'') + '" onchange="saveSante(\'' + esc(dateKey) + '\',\'douleur\',this.value)" onblur="saveSante(\'' + esc(dateKey) + '\',\'douleur\',this.value)"></div>';
-       html += '<div class="sante-form-row"><label>😊 Humeur du jour</label><div class="humeur-picker">';
-       for (var hi=1; hi<=5; hi++) {
-         html += '<button class="humeur-btn' + (data.humeur==hi?' active':'') + '" onclick="saveSanteHumeur(\'' + esc(dateKey) + '\',' + hi + ')">' + HUMEURS[hi-1] + '</button>';
-       }
-       html += '</div></div>';
-       html += '<div class="sante-form-row"><label>📝 Notes du jour</label><textarea class="sante-notes" onchange="saveSante(\'' + esc(dateKey) + '\',\'notesSante\',this.value)" onblur="saveSante(\'' + esc(dateKey) + '\',\'notesSante\',this.value)">' + esc(data.notesSante||'') + '</textarea></div>';
-       html += '</div>';
-
-       // Médicaments du jour
-       const meds = ST.medLogs[dateKey] || [];
-       html += '<div class="card"><div class="card-title">💊 Médicaments enregistrés (' + meds.length + ')</div>';
-       if (meds.length > 0) {
-         for (var mi=0; mi<meds.length; mi++) {
-           var m = meds[mi];
-           var pc = m.pain<=3?'pain-0':m.pain<=6?'pain-4':'pain-7';
-           html += '<div class="med-entry"><div><span class="med-time">' + esc(m.time) + '</span> <strong>' + esc(m.name) + '</strong> ' + esc(m.dose) + '</div><div><span class="med-pain ' + pc + '">🤕 ' + m.pain + '/10</span></div></div>';
-         }
-       } else {
-         html += '<div style="color:var(--sub);font-size:13px;">📅 Aucun médicament — utilisez l’onglet <strong>Jour</strong> pour en ajouter.</div>';
-       }
-       html += '</div>';
-
-       return html;
-     }
-
-     function renderSanteCal() {
-       const monthKey = ST.santeMonth || todayKey().substring(0,7);
-       const [year, month] = monthKey.split('-');
-       const d = new Date(year, parseInt(month)-1, 1);
-       const firstDay = d.getDay();
-       const daysInMonth = new Date(year, parseInt(month), 0).getDate();
-       const today = todayKey();
-
-       let html = '<div class="day-nav"><button onclick="santeCalNav(-1)">←</button><div>' + MOIS_FR[d.getMonth()] + ' ' + year + '</div><button onclick="santeCalNav(1)">→</button></div>';
-
-       html += '<div style="margin-bottom:16px;"><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px;">';
-       for (let i=0; i<7; i++) {
-         html += '<div style="text-align:center;font-size:11px;font-weight:600;color:var(--sub);">' + JOURS_COURT[i] + '</div>';
-       }
-       html += '</div><div class="sante-cal-grid">';
-
-       for (let i=0; i<firstDay; i++) html += '<div></div>';
-       for (let day=1; day<=daysInMonth; day++) {
-         const key = year + '-' + String(parseInt(month)).padStart(2,'0') + '-' + String(day).padStart(2,'0');
-         const sd = ST.sante[key] || {};
-         const hasMes = sd.poids || sd.tension_s || sd.glycemie || sd.sato2 || sd.temp || sd.sommeil || (sd.douleur!==undefined&&sd.douleur!=='');
-         const hasMeds = (ST.medLogs[key] || []).length > 0;
-         const highPain = (ST.medLogs[key] || []).some(function(m){return m.pain>=7;}) || (sd.douleur && parseFloat(sd.douleur)>=7);
-         const isToday = key === today;
-         html += '<div class="sante-cal-cell' + (isToday?' today':'') + '" onclick="santeCalSelect(\'' + esc(key) + '\'">';
-         html += '<span>' + day + '</span>';
-         html += '<div class="cal-dots">';
-         if (hasMes)   html += '<span class="cal-dot blue"></span>';
-         if (hasMeds)  html += '<span class="cal-dot purple"></span>';
-         if (highPain) html += '<span class="cal-dot red"></span>';
-         html += '</div></div>';
-       }
-       html += '</div></div>';
-
-       html += '<div style="font-size:11px;color:var(--sub);display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;">';
-       html += '<span><span class="cal-dot blue" style="display:inline-block;"></span> Mesures</span>';
-       html += '<span><span class="cal-dot purple" style="display:inline-block;"></span> Médicaments</span>';
-       html += '<span><span class="cal-dot red" style="display:inline-block;"></span> Douleur élevée</span>';
-       html += '<span style="border:2px solid var(--primary);padding:0 4px;border-radius:4px;">Aujourd’hui</span></div>';
-
-       return html;
-     }
-
-     function renderSanteHisto() {
-       const HUMEURS = ['😞','😕','😐','🙂','😄'];
-       const allDates = new Set();
-       Object.keys(ST.sante || {}).forEach(function(k){ allDates.add(k); });
-       Object.keys(ST.medLogs || {}).forEach(function(k){ if ((ST.medLogs[k]||[]).length>0) allDates.add(k); });
-       const entries = Array.from(allDates).sort().reverse().slice(0,60);
-
-       let html = '<div style="overflow-x:auto;"><table class="sante-histo"><tr><th>Date</th><th>⚖ Poids</th><th>💉 Tension</th><th>🩸 Glyc.</th><th>🫀 O₂</th><th>❤️ FC</th><th>🤕 Douleur</th><th>💤 Sommeil</th><th>😊 Humeur</th><th>💊 Méds</th></tr>';
-
-       for (var ei=0; ei<entries.length; ei++) {
-         const key = entries[ei];
-         const data = ST.sante[key] || {};
-         const meds = ST.medLogs[key] || [];
-         html += '<tr><td style="white-space:nowrap;">' + esc(formatShort(key)) + '</td>';
-
-         html += '<td>' + (data.poids ? '<span class="histo-val neu">' + data.poids + 'kg</span>' : '<span style="color:var(--sub)">-</span>') + '</td>';
-
-         if (data.tension_s && data.tension_d) {
-           const s = parseFloat(data.tension_s), dd = parseFloat(data.tension_d);
-           const tc = (s>=180||dd>=120)?'bad':(s>=140||dd>=90)?'warn':'ok';
-           html += '<td><span class="histo-val ' + tc + '">' + data.tension_s + '/' + data.tension_d + '</span></td>';
-         } else html += '<td><span style="color:var(--sub)">-</span></td>';
-
-         if (data.glycemie) {
-           const g = parseFloat(data.glycemie);
-           const gc = g>10?'bad':g>7?'warn':'ok';
-           html += '<td><span class="histo-val ' + gc + '">' + data.glycemie + '</span></td>';
-         } else html += '<td><span style="color:var(--sub)">-</span></td>';
-
-         if (data.sato2) {
-           const o = parseFloat(data.sato2);
-           const oc = o<90?'bad':o<95?'warn':'ok';
-           html += '<td><span class="histo-val ' + oc + '">' + data.sato2 + '%</span></td>';
-         } else html += '<td><span style="color:var(--sub)">-</span></td>';
-
-         if (data.fc) {
-           const fc = parseFloat(data.fc);
-           const fcc = fc>100?'warn':fc<50?'warn':'ok';
-           html += '<td><span class="histo-val ' + fcc + '">' + data.fc + '</span></td>';
-         } else html += '<td><span style="color:var(--sub)">-</span></td>';
-
-         if (data.douleur!==undefined && data.douleur!=='') {
-           const dv = parseFloat(data.douleur);
-           const dc = dv>=7?'bad':dv>=4?'warn':'ok';
-           html += '<td><span class="histo-val ' + dc + '">' + dv + '/10</span></td>';
-         } else html += '<td><span style="color:var(--sub)">-</span></td>';
-
-         html += '<td>' + (data.sommeil ? '<span class="histo-val neu">' + data.sommeil + 'h</span>' : '<span style="color:var(--sub)">-</span>') + '</td>';
-         html += '<td style="font-size:16px;">' + (data.humeur ? HUMEURS[data.humeur-1] : '<span style="color:var(--sub)">-</span>') + '</td>';
-
-         if (meds.length > 0) {
-           const maxPain = Math.max.apply(null, meds.map(function(m){return m.pain||0;}));
-           const mc = maxPain>=7?'bad':maxPain>=4?'warn':'ok';
-           html += '<td><span class="histo-val ' + mc + '">💊' + meds.length + '</span></td>';
-         } else html += '<td><span style="color:var(--sub)">-</span></td>';
-
-         html += '</tr>';
-       }
-
-       html += '</table></div>';
-       html += '<div style="font-size:12px;color:var(--sub);margin-top:16px;display:flex;gap:16px;flex-wrap:wrap;">';
-       html += '<span><span class="histo-val ok">Vert</span> = Normal</span>';
-       html += '<span><span class="histo-val warn">Orange</span> = Attention</span>';
-       html += '<span><span class="histo-val bad">Rouge</span> = Élevé</span></div>';
-
-       return html;
-     }
-
-
-    function renderConfig() {
-      const activeCount = Object.values(ST.activeTasks).filter(v => v).length;
-      let html = '<div class="config-intro">Bienvenue dans les paramètres! Activez et configurez les tâches pour votre routine quotidienne. <strong class="config-count">' + activeCount + ' tâche(s)</strong> actuellement active(s).</div>';
-
-      const sections = [
-        {name:'matin', title:'🌅 Matin', color:'var(--matin)'},
-        {name:'aprem', title:'☀️ Après-midi', color:'var(--aprem)'},
-        {name:'soir', title:'🌙 Soir', color:'var(--soir)'},
-        {name:'routine', title:'🔄 Routines récurrentes', color:'#6c63ff'},
-        {name:'menage',  title:'🧹 Tâches ménagères', color:'#0ea5e9'},
-        {name:'animaux', title:'🐾 Animaux', color:'#e879f9'},
-        {name:'medical', title:'🏥 Routine médicale', color:'#ef4444'},
-      ];
-
-      for (const sec of sections) {
-        const tasks = DEFAULT_TASKS[sec.name];
-        let activeInSec = tasks.filter(t => ST.activeTasks[t.id]).length;
-        let html2 = '<div class="config-section"><div class="config-section-title" style="color:' + sec.color + ';"><span>' + sec.title + ' (' + activeInSec + '/' + tasks.length + ')</span><button class="btn config-toggle-all" onclick="bulkToggle(\'' + sec.name + '\',true)">Tout ✓</button><button class="btn config-toggle-all" onclick="bulkToggle(\'' + sec.name + '\',false)">Tout ✗</button></div>';
-
-        for (const t of tasks) {
-          const active = ST.activeTasks[t.id];
-          const period = ST.activeTasks[t.id] || t.defPeriod;
-          const freq = ST.taskFreq[t.id] || 'Quotidien';
-          html2 += '<div class="config-task-row"><div class="config-task-header"><input type="checkbox"' + (active?' checked':'') + ' onchange="toggleTask(\'' + esc(t.id) + '\',\'' + t.defPeriod + '\')"><span class="config-task-name">' + t.emoji + ' ' + esc(t.name) + '</span></div>';
-          if (active) {
-            html2 += '<div class="config-period-picker">';
-            for (const p of ['matin','aprem','soir']) {
-              html2 += '<button class="period-btn' + (period===p?' active':'') + '" onclick="setPeriod(event,\'' + esc(t.id) + '\',\'' + p + '\')">' + (p==='matin'?'🌅':p==='aprem'?'☀️':'🌙') + '</button>';
-            }
-            html2 += '</div>';
-            html2 += '<div style="font-size:11px;color:var(--sub);margin-bottom:2px;">📅 Fréquence</div>';
-            html2 += '<div class="config-freq-picker">';
-            const freqs = ['Quotidien','Sem.','W-E','Perso'];
-            const freqLabels = ['Tous les jours','Jours semaine','Fin de semaine','Jours spéc.'];
-            for (var fi=0; fi<freqs.length; fi++) {
-              html2 += '<button class="freq-btn' + (freq===freqs[fi]?' active':'') + '" onclick="setFreq(\'' + esc(t.id) + '\',\'' + freqs[fi] + '\')" title="' + freqLabels[fi] + '">' + freqs[fi] + '</button>';
-            }
-            html2 += '</div>';
-            if (freq === 'Perso') {
-              html2 += '<div style="font-size:11px;color:var(--sub);margin:4px 0 2px;">Étiqueter les jours où la tâche doit apparaître :</div>';
-              html2 += '<div class="config-day-toggles">';
-              for (let dow=0; dow<7; dow++) {
-                const isDayActive = !!(ST.taskFreq[t.id+'_days'] && ST.taskFreq[t.id+'_days'][dow]);
-                html2 += '<button class="day-toggle' + (isDayActive?' active':'') + '" title="' + JOURS_FULL[dow] + '" onclick="toggleFreqDay(\'' + esc(t.id) + '\',' + dow + ')">' + JOURS_2[dow] + '</button>';
-              }
-              html2 += '</div>';
-              const selDays = [0,1,2,3,4,5,6].filter(function(d){ return ST.taskFreq[t.id+'_days'] && ST.taskFreq[t.id+'_days'][d]; });
-              if (selDays.length > 0) {
-                html2 += '<div class="schedule-badge">📅 ' + selDays.map(function(d){ return JOURS_FULL[d]; }).join(', ') + '</div>';
-              }
-            } else if (freq === 'Sem.') {
-              html2 += '<div class="schedule-badge">📅 Lundi au vendredi</div>';
-            } else if (freq === 'W-E') {
-              html2 += '<div class="schedule-badge">📅 Samedi et dimanche</div>';
-            }
-          }
-          html2 += '</div>';
-        }
-
-        html2 += '<div class="add-custom-task"><input type="text" id="custom_' + sec.name + '" placeholder="Ajouter une tâche personnalisée..."><button class="btn" onclick="addCustomTask(\'' + sec.name + '\')">+</button></div>';
-        html2 += '</div>';
-        html += html2;
+    function saveMedValue(id, dateKey, obj) {
+      if (!ST.sante[dateKey]) ST.sante[dateKey] = {};
+      var t = MED_TASKS[id];
+      if (t.type === 'tension') {
+        ST.sante[dateKey].tension_s = obj.s;
+        ST.sante[dateKey].tension_d = obj.d;
+      } else if (t.field) {
+        ST.sante[dateKey][t.field] = obj.val;
       }
+      ST.medValueOpen['med_'+id] = false;
+      if (!ST.completions[dateKey]) ST.completions[dateKey] = {};
+      ST.completions[dateKey][id] = true;
+      saveSt();
+    }
 
-      document.getElementById('content').innerHTML = html;
+    function saveSanteHumeur(dateKey, idx) {
+      if (!ST.sante[dateKey]) ST.sante[dateKey] = {};
+      ST.sante[dateKey].humeur = idx;
+      if (!ST.completions[dateKey]) ST.completions[dateKey] = {};
+      ST.completions[dateKey].rmed_humeur = true;
+      saveSt();
+    }
+
+    function toggleMedForm() {
+      ST.medFormOpen = !ST.medFormOpen;
+      saveSt();
+    }
+
+    function setPain(v) {
+      ST.medPain = v;
+      saveSt();
+    }
+
+    function addMedEntry(dateKey, time, name, dose, pain) {
+      if (!ST.medLogs[dateKey]) ST.medLogs[dateKey] = [];
+      ST.medLogs[dateKey].push({id: Date.now(), time, name, dose, pain});
+      saveSt();
+    }
+
+    function delMedEntry(dateKey, id) {
+      if (!ST.medLogs[dateKey]) return;
+      ST.medLogs[dateKey] = ST.medLogs[dateKey].filter(function(m){return m.id !== id;});
+      saveSt();
     }
 
     function saveSante(dateKey, field, val) {
-      if (!ST.sante) ST.sante = {};
       if (!ST.sante[dateKey]) ST.sante[dateKey] = {};
-      if (val === '' || val === null) {
-        delete ST.sante[dateKey][field];
-      } else {
-        ST.sante[dateKey][field] = val;
-      }
+      ST.sante[dateKey][field] = val;
       saveSt();
     }
 
-    function saveSanteHumeur(dateKey, val) {
-      if (!ST.sante) ST.sante = {};
-      if (!ST.sante[dateKey]) ST.sante[dateKey] = {};
-      ST.sante[dateKey].humeur = val;
+    function setSanteView(v) {
+      ST.santeView = v;
       saveSt();
-      renderSante();
     }
 
-    function shiftSanteDate(dir) {
-      const today = todayKey();
-      const curr = ST.santeDate || today;
-      const shifted = shiftDay(curr, dir);
-      if (dir > 0 && shifted > today) return;
-      ST.santeDate = shifted;
+    function shiftSanteDate(n) {
+      ST.santeDate = shiftDay(ST.santeDate, n);
       saveSt();
-      renderSante();
     }
 
-    function santeCalNav(dir) {
-      const monthKey = ST.santeMonth || todayKey().substring(0,7);
-      const [year, month] = monthKey.split('-');
-      let m = parseInt(month) + dir;
-      let y = parseInt(year);
-      if (m > 12) { m = 1; y++; }
-      if (m < 1) { m = 12; y--; }
-      ST.santeMonth = y + '-' + String(m).padStart(2,'0');
+    function santeCalNav(d) {
+      var m = new Date(parseInt(d.substr(0,4)), parseInt(d.substr(5,2))-1, 1);
+      ST.santeMonth = keyFromDate(m).substr(0, 7);
       saveSt();
-      renderSante();
     }
 
     function santeCalSelect(key) {
       ST.santeDate = key;
       ST.santeView = 'form';
       saveSt();
-      renderSante();
     }
 
-    function setSanteView(view) {
-      ST.santeView = view;
-      if (view === 'cal') {
-        ST.santeMonth = ST.santeMonth || todayKey().substring(0,7);
+    function addTodo(txt, pri) {
+      if (!txt) return;
+      ST.todos.push({id: Date.now(), text: txt, created: todayKey(), done: false, doneDate: null, priority: pri || 'Normal'});
+      saveSt();
+    }
+
+    function toggleTodo(id) {
+      var t = ST.todos.find(function(x){return x.id===id;});
+      if (t) {
+        t.done = !t.done;
+        if (t.done) t.doneDate = todayKey();
+        else t.doneDate = null;
+        saveSt();
       }
-      saveSt();
-      renderSante();
     }
 
-    function moveTask(period, taskId, dir) {
-      const active = getActiveByPeriod();
-      const tasks = active[period];
-      const idx = tasks.findIndex(t => t.id === taskId);
-      if (idx < 0) return;
-      const newIdx = idx + dir;
-      if (newIdx < 0 || newIdx >= tasks.length) return;
-      const tmp = tasks[idx];
-      tasks[idx] = tasks[newIdx];
-      tasks[newIdx] = tmp;
-      for (let i=0; i<tasks.length; i++) {
-        ST.taskOrder[tasks[i].id] = i;
-      }
+    function deleteTodo(id) {
+      ST.todos = ST.todos.filter(function(x){return x.id!==id;});
       saveSt();
-      renderToday();
     }
 
-    function toggleComp(taskId, dateKey) {
-      dateKey = dateKey || ST.activeDay;
-      if (!ST.completions[dateKey]) ST.completions[dateKey] = {};
-      ST.completions[dateKey][taskId] = !ST.completions[dateKey][taskId];
+    function toggleTodoHistory() {
+      ST.showTodoHisto = !ST.showTodoHisto;
       saveSt();
-      if (dateKey === ST.activeDay) renderToday();
-      else renderWeek();
     }
 
-    function toggleNote(taskId) {
-      const key = ST.activeDay + '_note_' + taskId;
-      ST.activeTasks[taskId + '_noteOpen'] = !ST.activeTasks[taskId + '_noteOpen'];
+    function saveJournal(dateKey, field, val) {
+      if (!ST.journal[dateKey]) ST.journal[dateKey] = {};
+      ST.journal[dateKey][field] = val;
       saveSt();
-      renderToday();
     }
 
-    function saveNote(taskId) {
-      const val = document.getElementById('note_' + taskId).value;
-      if (!ST.notes[ST.activeDay]) ST.notes[ST.activeDay] = {};
-      ST.notes[ST.activeDay][taskId] = val;
+    function toggleJournal() {
+      ST.journalOpen = !ST.journalOpen;
       saveSt();
-      ST.activeTasks[taskId + '_noteOpen'] = false;
-      renderToday();
     }
 
-    function deleteNote(taskId) {
-      if (!ST.notes[ST.activeDay]) ST.notes[ST.activeDay] = {};
-      delete ST.notes[ST.activeDay][taskId];
+    function toggleGratHisto() {
+      ST.showGratHisto = !ST.showGratHisto;
       saveSt();
-      ST.activeTasks[taskId + '_noteOpen'] = false;
-      renderToday();
     }
 
-    function toggleMedValueForm(taskId) {
-      if (!ST.medValueOpen) ST.medValueOpen = {};
-      ST.medValueOpen[taskId] = !ST.medValueOpen[taskId];
-      saveSt();
-      renderToday();
-    }
-
-    function saveMedValue(taskId, dateKey, humeurVal) {
-      if (!ST.sante) ST.sante = {};
-      if (!ST.sante[dateKey]) ST.sante[dateKey] = {};
-      const def = MED_TASKS[taskId];
-      if (!def) return;
-      if (humeurVal !== undefined) {
-        ST.sante[dateKey].humeur = humeurVal;
-      } else if (def.type === 'tension') {
-        const s = document.getElementById('medval_s_' + taskId);
-        const d = document.getElementById('medval_d_' + taskId);
-        if (s && s.value) ST.sante[dateKey].tension_s = s.value;
-        if (d && d.value) ST.sante[dateKey].tension_d = d.value;
-      } else {
-        const inp = document.getElementById('medval_' + taskId);
-        if (inp && inp.value !== '') ST.sante[dateKey][def.field] = inp.value;
-      }
-      if (!ST.completions[dateKey]) ST.completions[dateKey] = {};
-      ST.completions[dateKey][taskId] = true;
-      if (!ST.medValueOpen) ST.medValueOpen = {};
-      ST.medValueOpen[taskId] = false;
-      saveSt();
-      renderToday();
-    }
-
-    function toggleTask(id, defaultPeriod) {
-      if (ST.activeTasks[id]) {
-        delete ST.activeTasks[id];
-      } else {
-        ST.activeTasks[id] = defaultPeriod;
-      }
-      saveSt();
-      renderConfig();
-    }
-
-    function setPeriod(e, taskId, period) {
-      e.preventDefault();
-      ST.activeTasks[taskId] = period;
-      saveSt();
-      renderConfig();
-    }
-
-    function setFreq(taskId, type) {
-      ST.taskFreq[taskId] = type;
-      if (type !== 'Perso') {
-        delete ST.taskFreq[taskId + '_days'];
-      }
-      saveSt();
-      renderConfig();
-    }
-
-    function toggleFreqDay(taskId, dow) {
-      if (!ST.taskFreq[taskId + '_days']) ST.taskFreq[taskId + '_days'] = {};
-      ST.taskFreq[taskId + '_days'][dow] = !ST.taskFreq[taskId + '_days'][dow];
-      saveSt();
-      renderConfig();
-    }
-
-    function bulkToggle(section, val) {
-      const tasks = DEFAULT_TASKS[section];
-      for (const t of tasks) {
-        if (val) {
-          ST.activeTasks[t.id] = t.defPeriod;
-        } else {
-          delete ST.activeTasks[t.id];
-        }
-      }
-      saveSt();
-      renderConfig();
-    }
-
-    function addCustomTask(section) {
-      const inp = document.getElementById('custom_' + section);
-      const name = inp.value.trim();
+    function epicAdd(name, cat) {
       if (!name) return;
-      const id = 'custom_' + Date.now();
-      if (!ST.customTasks[section]) ST.customTasks[section] = [];
-      ST.customTasks[section].push({id, name, emoji:'✓'});
-      inp.value = '';
+      ST.epicItems.push({id: Date.now(), name, cat: cat || 'autre', checked: false});
       saveSt();
-      renderConfig();
-    }
-
-    function toggleMedForm() {
-      ST.medFormOpen = !ST.medFormOpen;
-      saveSt();
-      renderToday();
-    }
-
-    function setPain(val) {
-      ST.medPainSel = parseInt(val);
-      saveSt();
-    }
-
-    function addMedEntry() {
-      const time = document.getElementById('med_time').value;
-      const name = document.getElementById('med_name').value;
-      const dose = document.getElementById('med_dose').value;
-      const pain = parseInt(document.getElementById('med_pain').value) || 0;
-      if (!time || !name) return;
-      if (!ST.medLogs[ST.activeDay]) ST.medLogs[ST.activeDay] = [];
-      const id = 'med_' + Date.now();
-      ST.medLogs[ST.activeDay].push({id, time, name, dose, pain});
-      ST.medFormOpen = false;
-      saveSt();
-      renderToday();
-    }
-
-    function delMedEntry(id) {
-      const logs = ST.medLogs[ST.activeDay] || [];
-      ST.medLogs[ST.activeDay] = logs.filter(m => m.id !== id);
-      saveSt();
-      renderToday();
-    }
-
-    function epicAdd() {
-      const name = document.getElementById('epic_item').value.trim();
-      const cat = document.getElementById('epic_cat').value;
-      if (!name) return;
-      const id = 'epic_' + Date.now();
-      if (!ST.epicItems) ST.epicItems = [];
-      ST.epicItems.push({id, name, cat, checked: false});
-      document.getElementById('epic_item').value = '';
-      saveSt();
-      renderEpic();
     }
 
     function epicToggle(id) {
-      const item = ST.epicItems.find(it => it.id === id);
-      if (item) item.checked = !item.checked;
-      saveSt();
-      renderEpic();
+      var i = ST.epicItems.find(function(x){return x.id===id;});
+      if (i) { i.checked = !i.checked; saveSt(); }
     }
 
     function epicDel(id) {
-      ST.epicItems = (ST.epicItems || []).filter(it => it.id !== id);
+      ST.epicItems = ST.epicItems.filter(function(x){return x.id!==id;});
       saveSt();
-      renderEpic();
     }
 
     function epicClearChecked() {
-      ST.epicItems = (ST.epicItems || []).filter(it => !it.checked);
-      saveSt();
-      renderEpic();
-    }
-
-    function setEpicMode(mode) {
-      ST.epicMode = mode;
-      saveSt();
-      renderEpic();
-    }
-
-    function setEpicCat(cat) {
-      ST.epicCat = cat;
-      saveSt();
-      renderEpic();
-    }
-
-    function saveMenu(dateKey, meal, val) {
-      if (!ST.menus) ST.menus = {};
-      if (!ST.menus[dateKey]) ST.menus[dateKey] = {};
-      ST.menus[dateKey][meal] = val;
+      ST.epicItems = ST.epicItems.filter(function(x){return !x.checked;});
       saveSt();
     }
 
-    function menuNavWeek(dir) {
-      ST.menuWeekOffset = (ST.menuWeekOffset || 0) + dir;
+    function setEpicMode(m) {
+      ST.epicMode = m;
       saveSt();
-      renderEpic();
     }
 
-    function navWeek(dir) {
-      ST.weekOffset = (ST.weekOffset || 0) + dir;
+    function setEpicCat(c) {
+      ST.epicCat = c;
       saveSt();
-      renderWeek();
     }
 
-    function setWeekDays(days) {
-      ST.weekDays = days;
+    function saveMenu(key, meal, val) {
+      if (!ST.menus[key]) ST.menus[key] = {};
+      ST.menus[key][meal] = val;
       saveSt();
-      renderWeek();
     }
 
-    function toggleDayCard(el) {
-      el.classList.toggle('open');
-      el.nextElementSibling.classList.toggle('open');
-    }
-
-    function shiftActiveDay(dir) {
-      ST.activeDay = shiftDay(ST.activeDay, dir);
-      ST.santeDate = ST.activeDay;
+    function menuNavWeek(n) {
+      ST.menuWeekOffset = (ST.menuWeekOffset || 0) + n;
       saveSt();
-      renderToday();
     }
 
-    function switchTab(name) {
-      const btns = document.querySelectorAll('.tab-btn');
-      btns.forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active');
-      if (name === 'jour') renderToday();
-      else if (name === 'sem') renderWeek();
-      else if (name === 'epic') renderEpic();
-      else if (name === 'sante') renderSante();
-      else if (name === 'config') renderConfig();
+    function navWeek(n) {
+      ST.weekOffset = (ST.weekOffset || 0) + n;
+      saveSt();
+    }
+
+    function setWeekDays(d) {
+      ST.weekDays = d;
+      saveSt();
+    }
+
+    function toggleDayCard(key) {
+      var k = 'daycard_'+key;
+      ST.medValueOpen[k] = !ST.medValueOpen[k];
+      saveSt();
+    }
+
+    function shiftActiveDay(n) {
+      ST.activeDay = shiftDay(ST.activeDay, n);
+      saveSt();
+    }
+
+    function switchTab(t) {
+      activeTab = t;
+      render();
     }
 
     function toggleDarkMode() {
-      document.body.classList.toggle('dark');
-      ST.dark = document.body.classList.contains('dark');
+      ST.dark = !ST.dark;
       saveSt();
     }
 
-    window.addEventListener('load', function() {
-      if (ST.dark) document.body.classList.add('dark');
-      ST.activeDay = ST.activeDay || todayKey();
-      ST.santeDate = ST.santeDate || todayKey();
-      saveSt();
-      renderToday();
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW fail', err));
+    function renderToday() {
+      var key = ST.activeDay;
+      var d = dateFromKey(key);
+      var doneCount = Object.keys(ST.completions[key] || {}).length;
+      var allTasks = [];
+      Object.keys(DEFAULT_TASKS).forEach(function(cat){
+        DEFAULT_TASKS[cat].forEach(function(t){
+          if (taskMatchesDay(t.id, key)) allTasks.push(t.id);
+        });
+      });
+      allTasks = allTasks.concat(ST.customTasks.matin || []).concat(ST.customTasks.aprem || []).concat(ST.customTasks.soir || []);
+      allTasks = allTasks.filter(function(id, i, arr){ return arr.indexOf(id)===i; });
+      var total = allTasks.length;
+      var pct = total > 0 ? Math.round(100 * doneCount / total) : 0;
+
+      var h = '<div class="date-nav">' +
+        '<button onclick="shiftActiveDay(-1)">←</button>' +
+        '<div class="date-display">'+esc(formatLong(key))+'</div>' +
+        '<button onclick="shiftActiveDay(1)">→</button>' +
+        '</div>';
+
+      h += '<div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%"></div></div>';
+
+      var periods = ['matin','aprem','soir'];
+      var periodLabels = ['🌅 Matin', '☀️ Après-midi', '🌙 Soir'];
+      periods.forEach(function(p, i){
+        var tasks = getActiveByPeriod(p, key);
+        h += '<div class="period-label">'+periodLabels[i]+' ('+tasks.length+')</div>';
+        tasks.forEach(function(id){
+          var t = {};
+          Object.keys(DEFAULT_TASKS).forEach(function(cat){
+            var ft = DEFAULT_TASKS[cat].find(function(x){return x.id===id;});
+            if (ft) t = ft;
+          });
+          if (!t.name && ST.customTasks[p]) {
+            var ct = ST.customTasks[p].indexOf(id);
+            if (ct >= 0) t = {id, emoji: '⭐', name: 'Custom'};
+          }
+          var isDone = ST.completions[key] && ST.completions[key][id];
+          var noteText = ST.notes[key] && ST.notes[key][id];
+          var showNoteForm = ST.medValueOpen['note_'+id];
+          var isMed = id.startsWith('rmed_');
+          var showMedForm = isMed && ST.medValueOpen['med_'+id];
+
+          h += '<div class="task-card">';
+          h += '<div class="task-controls">';
+          h += '<button onclick="moveTask(\''+id+'\',1)" style="font-size:10px;">▼</button>';
+          h += '<button onclick="moveTask(\''+id+'\',-1)" style="font-size:10px;">▲</button>';
+          h += '</div>';
+          h += '<button class="task-checkbox '+(isDone?'checked':'')+'" onclick="toggleComp(\''+id+'\',\''+key+'\')">'+
+            (isDone ? '✓' : '') + '</button>';
+          h += '<div class="task-content">';
+          h += '<div class="task-name '+(isDone?'done':'')+'">'+t.emoji+' '+esc(t.name||'?')+'</div>';
+
+          var medVal = null;
+          if (isMed && ST.sante[key]) {
+            var mt = MED_TASKS[id];
+            if (mt.type === 'tension') {
+              var s = ST.sante[key].tension_s;
+              var d = ST.sante[key].tension_d;
+              if (s && d) medVal = s + '/' + d + ' ' + mt.unit;
+            } else if (mt.field) {
+              var v = ST.sante[key][mt.field];
+              if (v !== undefined && v !== null && v !== '') medVal = v + ' ' + mt.unit;
+            }
+          }
+          if (medVal) h += '<span class="med-badge">📊 '+medVal+'</span>';
+
+          h += '<div class="task-actions">';
+          h += '<button onclick="toggleNote(\''+id+'\')">📝</button>';
+          if (isMed) h += '<button onclick="toggleMedValueForm(\''+id+'\')">📊</button>';
+          h += '</div>';
+
+          if (showNoteForm) {
+            h += '<div style="margin-top:8px;"><textarea class="inline-textarea" id="note_'+id+'" placeholder="Note...">'+esc(noteText||'')+'</textarea>';
+            h += '<div style="margin-top:6px; display:flex; gap:8px;">';
+            h += '<button class="primary" onclick="saveNote(\''+id+'\',document.getElementById(\'note_'+id+'\').value,\''+key+'\')">✅ Sauver</button>';
+            h += '<button onclick="deleteNote(\''+id+'\',\''+key+'\'); toggleNote(\''+id+'\')">🗑️</button>';
+            h += '<button onclick="toggleNote(\''+id+'\')">Annuler</button>';
+            h += '</div></div>';
+          }
+
+          if (showMedForm && MED_TASKS[id]) {
+            var mt = MED_TASKS[id];
+            h += '<div class="med-value-form">';
+            if (mt.type === 'tension') {
+              h += '<div class="form-group"><label>Systolique ('+mt.unit+')</label>';
+              h += '<input type="number" id="med_'+id+'_s" value="'+(ST.sante[key]?.tension_s||'')+'" placeholder="ex: 120"></div>';
+              h += '<div class="form-group"><label>Diastolique ('+mt.unit+')</label>';
+              h += '<input type="number" id="med_'+id+'_d" value="'+(ST.sante[key]?.tension_d||'')+'" placeholder="ex: 80"></div>';
+              h += '<button class="primary" onclick="saveMedValue(\''+id+'\',\''+key+'\',{s:document.getElementById(\'med_'+id+'_s\').value,d:document.getElementById(\'med_'+id+'_d\').value})">✅ Enregistrer</button>';
+            } else if (mt.field) {
+              h += '<div class="form-group"><label>'+mt.label+' ('+mt.unit+')</label>';
+              var ph = mt.ph || '';
+              var step = mt.step || '1';
+              var max = mt.max || '';
+              var val = ST.sante[key]?.[mt.field] || '';
+              h += '<input type="number" id="med_'+id+'_val" value="'+val+'" placeholder="'+ph+'" step="'+step+'"'+
+                (max?'max="'+max+'"':'')+'></div>';
+              h += '<button class="primary" onclick="saveMedValue(\''+id+'\',\''+key+'\',{val:document.getElementById(\'med_'+id+'_val\').value})">✅ Enregistrer</button>';
+            }
+            h += '</div>';
+          }
+
+          h += '</div></div>';
+        });
+      });
+
+      h += '<div class="card">';
+      h += '<div class="card-header">💊 Médicaments</div>';
+      var meds = ST.medLogs[key] || [];
+      if (meds.length > 0) {
+        h += '<div style="margin-bottom:12px;">';
+        meds.forEach(function(m){
+          h += '<div style="padding:8px; background:var(--bg); border-radius:8px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">';
+          h += '<div><strong>'+esc(m.name)+'</strong> — '+esc(m.dose)+' à '+esc(m.time)+' (douleur: '+m.pain+'/10)</div>';
+          h += '<button onclick="delMedEntry(\''+key+'\','+m.id+')" style="width:32px; padding:4px; font-size:16px;">🗑️</button>';
+          h += '</div>';
+        });
+        h += '</div>';
       }
-    });
+      h += '<button class="primary" onclick="toggleMedForm()" style="width:100%;">+ Ajouter</button>';
+
+      if (ST.medFormOpen) {
+        h += '<div class="med-value-form" style="margin-top:12px;">';
+        h += '<div class="form-group"><label>Heure</label><input type="time" id="med_time"></div>';
+        h += '<div class="form-group"><label>Nom du médicament</label><input type="text" id="med_name" placeholder="ex: Ibuprofène"></div>';
+        h += '<div class="form-group"><label>Dose</label><input type="text" id="med_dose" placeholder="ex: 500mg"></div>';
+        h += '<div class="form-group"><label>Douleur (0-10)</label><input type="number" id="med_pain" min="0" max="10" value="0"></div>';
+        h += '<button class="primary" onclick="addMedEntry(\''+key+'\',document.getElementById(\'med_time\').value,document.getElementById(\'med_name\').value,document.getElementById(\'med_dose\').value,document.getElementById(\'med_pain\').value); toggleMedForm();" style="width:100%;">Ajouter</button>';
+        h += '</div>';
+      }
+      h += '</div>';
+
+      var pending = ST.todos.filter(function(t){return !t.done;});
+      var done = ST.todos.filter(function(t){return t.done;});
+      h += '<div class="todo-section">';
+      h += '<div class="card-header">📋 Tâches ponctuelles (' + pending.length + ')</div>';
+      h += '<div class="todo-add-row">';
+      h += '<input type="text" id="todo_text" placeholder="Nouvelle tâche...">';
+      h += '<select id="todo_pri"><option value="Normal">Normal</option><option value="Urgent">Urgent</option><option value="Important">Important</option></select>';
+      h += '<button onclick="addTodo(document.getElementById(\'todo_text\').value, document.getElementById(\'todo_pri\').value); document.getElementById(\'todo_text\').value=\'\'; document.getElementById(\'todo_pri\').value=\'Normal\';">Ajouter</button>';
+      h += '</div>';
+      h += '<div class="todo-list">';
+      pending.forEach(function(t){
+        var priClass = t.priority.toLowerCase();
+        h += '<div class="todo-item">';
+        h += '<span class="todo-priority-badge '+priClass+'">'+esc(t.priority)+'</span>';
+        h += '<div class="todo-item-content">';
+        h += '<div class="todo-item-text">'+esc(t.text)+'</div>';
+        h += '<div class="todo-item-dates">Créée: '+formatShort(t.created)+'</div>';
+        h += '</div>';
+        h += '<div class="todo-item-actions">';
+        h += '<button onclick="toggleTodo('+t.id+')">✅</button>';
+        h += '<button onclick="deleteTodo('+t.id+')">🗑️</button>';
+        h += '</div>';
+        h += '</div>';
+      });
+      h += '</div>';
+
+      var histBtn = '<button onclick="toggleTodoHistory()" style="margin-top:12px; width:100%;">📅 Tâches complétées ('+done.length+')</button>';
+      if (ST.showTodoHisto && done.length > 0) {
+        h += histBtn;
+        h += '<div class="todo-list" style="margin-top:12px;">';
+        done.sort(function(a,b){return dateFromKey(b.doneDate||'').getTime() - dateFromKey(a.doneDate||'').getTime();});
+        done.forEach(function(t){
+          h += '<div class="todo-item todo-done-item">';
+          h += '<span class="todo-priority-badge normal" style="opacity:0.6;">'+esc(t.priority)+'</span>';
+          h += '<div class="todo-item-content">';
+          h += '<div class="todo-item-text">'+esc(t.text)+'</div>';
+          h += '<div class="todo-item-dates">Complétée: '+formatShort(t.doneDate)+' • Créée: '+formatShort(t.created)+'</div>';
+          h += '</div>';
+          h += '<div class="todo-item-actions">';
+          h += '<button onclick="toggleTodo('+t.id+')">↩️</button>';
+          h += '<button onclick="deleteTodo('+t.id+')">🗑️</button>';
+          h += '</div>';
+          h += '</div>';
+        });
+        h += '</div>';
+      } else if (done.length > 0) {
+        h += histBtn;
+      }
+      h += '</div>';
+
+      h += '<div class="journal-card">';
+      h += '<div class="journal-header" onclick="toggleJournal()">📓 Journal du jour '+(ST.journalOpen?'▼':'▶')+' </div>';
+      h += '<div class="journal-body '+(ST.journalOpen?'open':'')+'">';
+      var j = ST.journal[key] || {};
+      h += '<div class="journal-row">';
+      h += '<div class="form-group"><label>⏰ Heure de lever</label><input type="time" value="'+(j.lever||'')+'" onchange="saveJournal(\''+key+'\',\'lever\',this.value)"></div>';
+      h += '<div class="form-group"><label>🌙 Heure de coucher</label><input type="time" value="'+(j.coucher||'')+'" onchange="saveJournal(\''+key+'\',\'coucher\',this.value)"></div>';
+      h += '</div>';
+      h += '<div class="journal-row full">';
+      h += '<div class="form-group"><label>📚 Devoirs / Études</label><textarea onchange="saveJournal(\''+key+'\',\'devoirs\',this.value)">'+esc(j.devoirs||'')+'</textarea></div>';
+      h += '</div>';
+      h += '<div class="journal-row full">';
+      h += '<div class="form-group"><label>💼 Travail</label><textarea onchange="saveJournal(\''+key+'\',\'travail\',this.value)">'+esc(j.travail||'')+'</textarea></div>';
+      h += '</div>';
+      h += '<div class="journal-row full">';
+      h += '<div class="form-group"><label>🙏 Gratitude</label><textarea onchange="saveJournal(\''+key+'\',\'gratitude\',this.value)">'+esc(j.gratitude||'')+'</textarea></div>';
+      h += '</div>';
+      if (ST.journal && Object.keys(ST.journal).length > 1) {
+        h += '<button onclick="toggleGratHisto()" style="width:100%; margin-top:12px;">Gratitudes précédentes ('+Math.max(0,Object.keys(ST.journal).length-1)+')</button>';
+        if (ST.showGratHisto) {
+          h += '<div style="margin-top:12px;">';
+          var grats = [];
+          Object.keys(ST.journal).forEach(function(k){
+            if (ST.journal[k].gratitude) grats.push({date:k, text:ST.journal[k].gratitude});
+          });
+          grats.sort(function(a,b){return dateFromKey(b.date).getTime() - dateFromKey(a.date).getTime();});
+          grats.slice(0, 10).forEach(function(g){
+            h += '<div style="padding:10px; background:var(--bg); border-radius:8px; margin-bottom:8px;">';
+            h += '<strong>'+formatShort(g.date)+':</strong> '+esc(g.text);
+            h += '</div>';
+          });
+          h += '</div>';
+        }
+      }
+      h += '</div>';
+      h += '</div>';
+
+      return h;
+    }
+
+    function renderWeek() {
+      var h = '<div style="margin-bottom:16px;">';
+      h += '<label>Jours: </label>';
+      [3,7,14,30].forEach(function(d){
+        h += '<button onclick="setWeekDays('+d+')" '+(ST.weekDays===d?'style="background:var(--primary); color:white;"':'')+'> '+d+' </button>';
+      });
+      h += '</div>';
+
+      var monday = mondayOfWeek(todayKey());
+      var startKey = shiftDay(monday, ST.weekOffset * 7);
+      h += '<div class="date-nav">';
+      h += '<button onclick="navWeek(-1)">←</button>';
+      h += '<div class="date-display">'+formatShort(startKey)+'</div>';
+      h += '<button onclick="navWeek(1)">→</button>';
+      h += '</div>';
+
+      for (var i = 0; i < ST.weekDays; i++) {
+        var dayKey = shiftDay(startKey, i);
+        var isOpen = ST.medValueOpen['daycard_'+dayKey];
+        var d = dateFromKey(dayKey);
+        var dow = JOURS_2[d.getDay()];
+
+        h += '<div class="day-card">';
+        h += '<div class="day-card-header" onclick="toggleDayCard(\''+dayKey+'\')">'+dow+' '+d.getDate()+' '+(isOpen?'▼':'▶')+'</div>';
+        h += '<div class="day-card-body '+(isOpen?'open':'')+'">';
+
+        var periods = ['matin','aprem','soir'];
+        var periodLabels = ['🌅','☀️','🌙'];
+        periods.forEach(function(p, pi){
+          var tasks = getActiveByPeriod(p, dayKey);
+          if (tasks.length > 0) {
+            h += '<div style="margin-bottom:12px;">';
+            h += '<div style="font-weight:600; font-size:13px; margin-bottom:6px;">'+periodLabels[pi]+'</div>';
+            tasks.forEach(function(id){
+              var t = {};
+              Object.keys(DEFAULT_TASKS).forEach(function(cat){
+                var ft = DEFAULT_TASKS[cat].find(function(x){return x.id===id;});
+                if (ft) t = ft;
+              });
+              var isDone = ST.completions[dayKey] && ST.completions[dayKey][id];
+              h += '<div style="display:flex; gap:8px; margin-bottom:6px; padding:8px; background:var(--bg); border-radius:6px;">';
+              h += '<input type="checkbox" '+(isDone?'checked':'')+' onchange="toggleComp(\''+id+'\',\''+dayKey+'\')" style="cursor:pointer;">';
+              h += '<span '+(isDone?'style="text-decoration:line-through; color:var(--sub);"':'')+'>'+(t.emoji||'')+'  '+esc(t.name||'')+'</span>';
+              h += '</div>';
+            });
+            h += '</div>';
+          }
+        });
+
+        h += '</div></div>';
+      }
+
+      return h;
+    }
+
+    function renderEpic() {
+      var h = '<div class="sub-tabs">';
+      h += '<div class="sub-tab '+(ST.epicMode==='liste'?'active':'')+'\" onclick="setEpicMode(\'liste\')">🛒 Liste d\'épicerie</div>';
+      h += '<div class="sub-tab '+(ST.epicMode==='menu'?'active':'')+'\" onclick="setEpicMode(\'menu\')">🍽️ Menu semaine</div>';
+      h += '</div>';
+
+      if (ST.epicMode === 'liste') {
+        h += '<div class="card">';
+        h += '<div class="card-header">Ajouter un article</div>';
+        h += '<div style="display:flex; gap:8px; margin-bottom:12px;">';
+        h += '<input type="text" id="epic_name" placeholder="Article..." style="flex:1; padding:8px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text);">';
+        h += '<select id="epic_cat" style="padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text);">';
+        Object.keys(CATEGORIES).forEach(function(k){
+          h += '<option value="'+k+'">'+CATEGORIES[k]+'</option>';
+        });
+        h += '</select>';
+        h += '<button class="primary" onclick="epicAdd(document.getElementById(\'epic_name\').value, document.getElementById(\'epic_cat\').value); document.getElementById(\'epic_name\').value=\'\';">+</button>';
+        h += '</div>';
+
+        h += '<div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">';
+        h += '<button onclick="setEpicCat(\'\')" style="'+(ST.epicCat===''?'background:var(--primary); color:white;':'')+'">Tous</button>';
+        Object.keys(CATEGORIES).forEach(function(k){
+          h += '<button onclick="setEpicCat(\''+k+'\')" style="'+(ST.epicCat===k?'background:var(--primary); color:white;':'')+'">'+CATEGORIES[k]+'</button>';
+        });
+        h += '</div>';
+
+        var items = ST.epicItems;
+        if (ST.epicCat) items = items.filter(function(x){return x.cat===ST.epicCat;});
+        var unchecked = items.filter(function(x){return !x.checked;});
+        var checked = items.filter(function(x){return x.checked;});
+
+        h += '<div>';
+        unchecked.forEach(function(item){
+          h += '<div style="display:flex; gap:10px; padding:10px; background:var(--bg); border-radius:8px; margin-bottom:6px; align-items:center;">';
+          h += '<input type="checkbox" onchange="epicToggle('+item.id+')" style="cursor:pointer;">';
+          h += '<span style="flex:1;">'+esc(item.name)+'</span>';
+          h += '<button onclick="epicDel('+item.id+')" style="width:32px; padding:4px; font-size:14px;">🗑️</button>';
+          h += '</div>';
+        });
+        h += '</div>';
+
+        if (checked.length > 0) {
+          h += '<button onclick="epicClearChecked()" style="width:100%; margin-top:12px; background:#10b981; color:white;">Effacer les cochés</button>';
+          h += '<div style="margin-top:12px;">';
+          checked.forEach(function(item){
+            h += '<div style="display:flex; gap:10px; padding:10px; background:var(--bg); border-radius:8px; margin-bottom:6px; align-items:center; opacity:0.6;">';
+            h += '<input type="checkbox" checked onchange="epicToggle('+item.id+')" style="cursor:pointer;">';
+            h += '<span style="flex:1; text-decoration:line-through;">'+esc(item.name)+'</span>';
+            h += '<button onclick="epicDel('+item.id+')" style="width:32px; padding:4px; font-size:14px;">🗑️</button>';
+            h += '</div>';
+          });
+          h += '</div>';
+        }
+        h += '</div>';
+      } else {
+        h += '<div class="date-nav">';
+        h += '<button onclick="menuNavWeek(-1)">←</button>';
+        h += '<div class="date-display">Semaine</div>';
+        h += '<button onclick="menuNavWeek(1)">→</button>';
+        h += '</div>';
+
+        var monday = mondayOfWeek(todayKey());
+        var weekStart = shiftDay(monday, (ST.menuWeekOffset || 0) * 7);
+        for (var i = 0; i < 7; i++) {
+          var dayKey = shiftDay(weekStart, i);
+          var d = dateFromKey(dayKey);
+          var menu = ST.menus[dayKey] || {};
+          h += '<div class="day-card">';
+          h += '<div class="day-card-header">'+JOURS_2[d.getDay()]+' '+d.getDate()+'</div>';
+          h += '<div class="meal-row">';
+          h += '<label style="padding-top:10px;">'+MEALS.dej+'</label>';
+          h += '<input type="text" value="'+(menu.dej||'')+'" onchange="saveMenu(\''+dayKey+'\',\'dej\',this.value)" placeholder="Déjeuner">';
+          h += '</div>';
+          h += '<div class="meal-row">';
+          h += '<label style="padding-top:10px;">'+MEALS.diner+'</label>';
+          h += '<input type="text" value="'+(menu.diner||'')+'" onchange="saveMenu(\''+dayKey+'\',\'diner\',this.value)" placeholder="Dîner">';
+          h += '</div>';
+          h += '<div class="meal-row">';
+          h += '<label style="padding-top:10px;">'+MEALS.souper+'</label>';
+          h += '<input type="text" value="'+(menu.souper||'')+'" onchange="saveMenu(\''+dayKey+'\',\'souper\',this.value)" placeholder="Souper">';
+          h += '</div>';
+          h += '</div>';
+        }
+      }
+
+      return h;
+    }
+
+    function renderSante() {
+      var h = '<div class="sub-tabs">';
+      h += '<div class="sub-tab '+(ST.santeView==='form'?'active':'')+'\" onclick="setSanteView(\'form\')">📋 Saisie</div>';
+      h += '<div class="sub-tab '+(ST.santeView==='cal'?'active':'')+'\" onclick="setSanteView(\'cal\')">📅 Calendrier</div>';
+      h += '<div class="sub-tab '+(ST.santeView==='histo'?'active':'')+'\" onclick="setSanteView(\'histo\')">📈 Historique</div>';
+      h += '</div>';
+
+      if (ST.santeView === 'form') {
+        var dateKey = ST.santeDate;
+        var s = ST.sante[dateKey] || {};
+        h += '<div class="date-nav" style="margin-bottom:16px;">';
+        h += '<button onclick="shiftSanteDate(-1)">←</button>';
+        h += '<div class="date-display">'+formatLong(dateKey)+'</div>';
+        h += '<button onclick="shiftSanteDate(1)">→</button>';
+        h += '</div>';
+
+        h += '<div class="card">';
+        h += '<div class="card-header">📊 Mesures corporelles</div>';
+        h += '<div class="form-group"><label>⚖️ Poids (kg)</label><input type="number" step="0.1" value="'+(s.poids||'')+'" placeholder="ex: 65.0" onchange="saveSante(\''+dateKey+'\',\'poids\',this.value)"></div>';
+        h += '<div class="form-group"><label>💉 Tension (mmHg)</label>';
+        h += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">';
+        h += '<input type="number" placeholder="Sys." value="'+(s.tension_s||'')+'" onchange="saveSante(\''+dateKey+'\',\'tension_s\',this.value)">';
+        h += '<input type="number" placeholder="Dia." value="'+(s.tension_d||'')+'" onchange="saveSante(\''+dateKey+'\',\'tension_d\',this.value)">';
+        h += '</div></div>';
+        h += '<div class="form-group"><label>🩸 Glycémie (mmol/L)</label><input type="number" step="0.1" value="'+(s.glycemie||'')+'" placeholder="ex: 5.5" onchange="saveSante(\''+dateKey+'\',\'glycemie\',this.value)"></div>';
+        h += '<div class="form-group"><label>🫀 Saturation O₂ (%)</label><input type="number" value="'+(s.sato2||'')+'" placeholder="ex: 98" onchange="saveSante(\''+dateKey+'\',\'sato2\',this.value)"></div>';
+        h += '<div class="form-group"><label>🌡️ Température (°C)</label><input type="number" step="0.1" value="'+(s.temp||'')+'" placeholder="ex: 37.0" onchange="saveSante(\''+dateKey+'\',\'temp\',this.value)"></div>';
+        h += '<div class="form-group"><label>❤️ Fréquence cardiaque (bpm)</label><input type="number" value="'+(s.fc||'')+'" placeholder="ex: 70" onchange="saveSante(\''+dateKey+'\',\'fc\',this.value)"></div>';
+        h += '</div>';
+
+        h += '<div class="card">';
+        h += '<div class="card-header">🌟 Bien-être</div>';
+        h += '<div class="form-group"><label>💤 Sommeil (h)</label><input type="number" step="0.5" value="'+(s.sommeil||'')+'" placeholder="ex: 8" onchange="saveSante(\''+dateKey+'\',\'sommeil\',this.value)"></div>';
+        h += '<div class="form-group"><label>🤕 Douleur (0-10)</label><input type="number" min="0" max="10" value="'+(s.douleur||'')+'" onchange="saveSante(\''+dateKey+'\',\'douleur\',this.value)"></div>';
+        h += '<div class="form-group"><label>😊 Humeur du jour</label>';
+        h += '<div style="display:flex; gap:8px; margin-top:8px;">';
+        HUMEURS.forEach(function(emoji, idx){
+          var selected = s.humeur === idx;
+          h += '<button class="humeur-btn '+(selected?'selected':'')+'" onclick="saveSanteHumeur(\''+dateKey+'\','+idx+')">'+emoji+'</button>';
+        });
+        h += '</div></div>';
+        h += '<div class="form-group"><label>Notes</label><textarea class="sante-notes" onchange="saveSante(\''+dateKey+'\',\'notesSante\',this.value)">'+esc(s.notesSante||'')+'</textarea></div>';
+        h += '</div>';
+
+        h += '<div class="card">';
+        h += '<div class="card-header">💊 Médicaments</div>';
+        var meds = ST.medLogs[dateKey] || [];
+        if (meds.length > 0) {
+          h += '<div style="font-size:13px;">';
+          meds.forEach(function(m){
+            h += '<div style="padding:8px; background:var(--bg); border-radius:6px; margin-bottom:6px;">'+esc(m.name)+' '+esc(m.dose)+' à '+esc(m.time)+'</div>';
+          });
+          h += '</div>';
+        } else {
+          h += '<p style="color:var(--sub); font-size:13px;">Utilisez l\'onglet Jour pour ajouter des médicaments</p>';
+        }
+        h += '</div>';
+      } else if (ST.santeView === 'cal') {
+        var monthStr = ST.santeMonth || formatLong(todayKey()).substr(0, 7);
+        var m = parseInt(monthStr.substr(5, 2));
+        var y = parseInt(monthStr.substr(0, 4));
+        var firstDay = new Date(y, m-1, 1);
+        var lastDay = new Date(y, m, 0);
+        var firstDow = firstDay.getDay();
+        var totalDays = lastDay.getDate();
+
+        h += '<div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">';
+        h += '<button onclick="var nm=new Date('+y+','+(m-2)+',1); santeCalNav(nm.getFullYear()+\'-\'+String(nm.getMonth()+1).padStart(2,\'0\')+\'-01\');">←</button>';
+        h += '<span style="font-weight:600;">'+MOIS_FR[m-1]+' '+y+'</span>';
+        h += '<button onclick="var nm=new Date('+y+','+(m)+',1); santeCalNav(nm.getFullYear()+\'-\'+String(nm.getMonth()+1).padStart(2,\'0\')+\'-01\');">→</button>';
+        h += '</div>';
+
+        h += '<div class="cal-grid">';
+        JOURS_COURT.forEach(function(d){
+          h += '<div style="text-align:center; font-weight:600; font-size:12px; padding:8px;">'+d+'</div>';
+        });
+        for (var i = 0; i < firstDow; i++) h += '<div></div>';
+        for (var d = 1; d <= totalDays; d++) {
+          var key = y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+          var hasMeas = ST.sante[key] && (ST.sante[key].poids || ST.sante[key].tension_s || ST.sante[key].glycemie);
+          var hasMeds = ST.medLogs[key] && ST.medLogs[key].length > 0;
+          var pain = ST.sante[key]?.douleur;
+          var highPain = pain && parseInt(pain) >= 7;
+
+          h += '<div class="cal-day" onclick="santeCalSelect(\''+key+'\')" style="cursor:pointer;">';
+          h += '<div>'+d+'</div>';
+          h += '<div class="cal-dots">';
+          if (hasMeas) h += '<div class="cal-dot blue"></div>';
+          if (hasMeds) h += '<div class="cal-dot purple"></div>';
+          if (highPain) h += '<div class="cal-dot red"></div>';
+          h += '</div>';
+          h += '</div>';
+        }
+        h += '</div>';
+      } else {
+        var entries = [];
+        Object.keys(ST.sante).forEach(function(k){
+          entries.push({date: k, data: ST.sante[k]});
+        });
+        entries.sort(function(a,b){return dateFromKey(b.date).getTime() - dateFromKey(a.date).getTime();});
+        entries = entries.slice(0, 60);
+
+        h += '<div style="overflow-x:auto;">';
+        h += '<table class="histo-table">';
+        h += '<thead><tr><th>Date</th><th>Poids</th><th>Tension</th><th>Glyc.</th><th>O₂</th><th>FC</th><th>Douleur</th><th>Sommeil</th><th>Humeur</th><th>Méds</th></tr></thead>';
+        h += '<tbody>';
+        entries.forEach(function(e){
+          var d = e.data;
+          h += '<tr><td>'+formatShort(e.date)+'</td>';
+          h += '<td>'+(d.poids ? '<span class="histo-val ok">'+d.poids+' kg</span>' : '-')+'</td>';
+          h += '<td>'+(d.tension_s && d.tension_d ? '<span class="histo-val ok">'+d.tension_s+'/'+d.tension_d+'</span>' : '-')+'</td>';
+          h += '<td>'+(d.glycemie ? (parseInt(d.glycemie)<4 || parseInt(d.glycemie)>8 ? '<span class="histo-val warn">'+d.glycemie+'</span>' : '<span class="histo-val ok">'+d.glycemie+'</span>') : '-')+'</td>';
+          h += '<td>'+(d.sato2 ? (parseInt(d.sato2)<95 ? '<span class="histo-val bad">'+d.sato2+'%</span>' : '<span class="histo-val ok">'+d.sato2+'%</span>') : '-')+'</td>';
+          h += '<td>'+(d.fc ? '<span class="histo-val '+(parseInt(d.fc)>100?'warn':'ok')+'">'+d.fc+'</span>' : '-')+'</td>';
+          h += '<td>'+(d.douleur ? (parseInt(d.douleur)>=7 ? '<span class="histo-val bad">'+d.douleur+'/10</span>' : '<span class="histo-val ok">'+d.douleur+'/10</span>') : '-')+'</td>';
+          h += '<td>'+(d.sommeil ? '<span class="histo-val '+(parseInt(d.sommeil)<6?'warn':'ok')+'">'+d.sommeil+'h</span>' : '-')+'</td>';
+          h += '<td>'+(d.humeur !== undefined ? '<span class="histo-val neu">'+HUMEURS[d.humeur]+'</span>' : '-')+'</td>';
+          h += '<td>'+(ST.medLogs[e.date] && ST.medLogs[e.date].length>0 ? '<span class="histo-val neu">'+ST.medLogs[e.date].length+'</span>' : '-')+'</td>';
+          h += '</tr>';
+        });
+        h += '</tbody>';
+        h += '</table>';
+        h += '</div>';
+      }
+
+      return h;
+    }
+
+    function renderConfig() {
+      var h = '';
+      var sections = [
+        {key:'matin', label:'🌅 Matin', icon:'🌅'},
+        {key:'aprem', label:'☀️ Après-midi', icon:'☀️'},
+        {key:'soir', label:'🌙 Soir', icon:'🌙'},
+        {key:'routine', label:'🔄 Routines récurrentes', icon:'🔄'},
+        {key:'menage', label:'🧹 Tâches ménagères', icon:'🧹'},
+        {key:'animaux', label:'🐾 Animaux', icon:'🐾'},
+        {key:'medical', label:'🏥 Routine médicale', icon:'🏥'},
+      ];
+
+      sections.forEach(function(sec){
+        var tasks = DEFAULT_TASKS[sec.key] || [];
+        var active = tasks.filter(function(t){return ST.activeTasks[t.id];}).length;
+
+        h += '<div class="config-section">';
+        h += '<div class="config-header">';
+        h += '<div>'+sec.label+' ('+active+'/'+tasks.length+')</div>';
+        h += '<div style="display:flex; gap:8px;">';
+        h += '<button onclick="bulkToggle(\''+sec.key+'\',true)">Tout ✓</button>';
+        h += '<button onclick="bulkToggle(\''+sec.key+'\',false)">Tout ✗</button>';
+        h += '</div>';
+        h += '</div>';
+
+        h += '<div class="config-items">';
+        tasks.forEach(function(task){
+          var isActive = !!ST.activeTasks[task.id];
+          var freq = ST.taskFreq[task.id] || 'Quotidien';
+          var freqDays = ST.taskFreq[task.id+'_days'] || {};
+
+          h += '<div class="config-item">';
+          h += '<input type="checkbox" class="config-checkbox" '+(isActive?'checked':'')+' onchange="toggleTask(\''+task.id+'\')">';
+          h += '<div class="config-details">';
+          h += '<div class="config-name">'+task.emoji+' '+esc(task.name)+'</div>';
+          h += '<div class="config-controls">';
+          h += '<select onchange="setPeriod(\''+task.id+'\',this.value)">';
+          h += '<option value="matin" '+(ST.activeTasks[task.id]==='matin'?'selected':'')+'> 🌅 Matin</option>';
+          h += '<option value="aprem" '+(ST.activeTasks[task.id]==='aprem'?'selected':'')+'> ☀️ Après-midi</option>';
+          h += '<option value="soir" '+(ST.activeTasks[task.id]==='soir'?'selected':'')+'> 🌙 Soir</option>';
+          h += '</select>';
+          h += '<select onchange="setFreq(\''+task.id+'\',this.value)">';
+          h += '<option value="Quotidien" '+(freq==='Quotidien'?'selected':'')+'> Quotidien</option>';
+          h += '<option value="Sem." '+(freq==='Sem.'?'selected':'')+'> Sem.</option>';
+          h += '<option value="W-E" '+(freq==='W-E'?'selected':'')+'> W-E</option>';
+          h += '<option value="Perso" '+(freq==='Perso'?'selected':'')+'> Perso</option>';
+          h += '</select>';
+
+          if (freq === 'Sem.') {
+            h += '<span class="schedule-badge">📅 Lundi au vendredi</span>';
+          } else if (freq === 'W-E') {
+            h += '<span class="schedule-badge">📅 Samedi et dimanche</span>';
+          } else if (freq === 'Perso') {
+            h += '<div class="config-days">';
+            for (var d = 0; d < 7; d++) {
+              var selected = !!freqDays[d];
+              h += '<button class="config-day-btn '+(selected?'selected':'')+'" onclick="toggleFreqDay(\''+task.id+'\','+d+')" title="'+JOURS_FULL[d]+'">'+JOURS_COURT[d]+'</button>';
+            }
+            h += '</div>';
+          }
+          h += '</div>';
+          h += '</div></div>';
+        });
+
+        h += '<div class="config-custom-input">';
+        h += '<input type="text" id="custom_'+sec.key+'" placeholder="Ajouter une tâche personnalisée...">';
+        h += '<button onclick="var txt=document.getElementById(\'custom_'+sec.key+'\').value; addCustomTask(\''+sec.key+'\',txt); document.getElementById(\'custom_'+sec.key+'\').value=\'\';">+</button>';
+        h += '</div>';
+
+        h += '</div></div>';
+      });
+
+      return h;
+    }
+
+    function render() {
+      var html = '<div class="header">' +
+        '<h1>Ma Journée ✨</h1>' +
+        '<div class="header-actions">' +
+        '<button class="icon" onclick="toggleDarkMode()" title="Thème">'+(ST.dark?'🌙':'☀️')+'</button>' +
+        '</div>' +
+        '</div>';
+
+      html += '<div class="nav-tabs">' +
+        '<div class="nav-tab '+(activeTab==='jour'?'active':'')+'" onclick="switchTab(\'jour\')">📅 Jour</div>' +
+        '<div class="nav-tab '+(activeTab==='week'?'active':'')+'" onclick="switchTab(\'week\')">🗓️ Sem.</div>' +
+        '<div class="nav-tab '+(activeTab==='epic'?'active':'')+'" onclick="switchTab(\'epic\')">🛒 Épic.</div>' +
+        '<div class="nav-tab '+(activeTab==='sante'?'active':'')+'" onclick="switchTab(\'sante\')">📊 Santé</div>' +
+        '<div class="nav-tab '+(activeTab==='config'?'active':'')+'" onclick="switchTab(\'config\')">⚙️ Config</div>' +
+        '</div>';
+
+      html += '<div class="content">';
+      if (activeTab === 'jour') html += renderToday();
+      else if (activeTab === 'week') html += renderWeek();
+      else if (activeTab === 'epic') html += renderEpic();
+      else if (activeTab === 'sante') html += renderSante();
+      else if (activeTab === 'config') html += renderConfig();
+      html += '</div>';
+
+      document.getElementById('root').innerHTML = html;
+      document.body.classList.toggle('dark', ST.dark);
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(function(err){
+        console.log('SW registration failed:', err);
+      });
+    }
+
+    render();
   </script>
 </body>
 </html>
